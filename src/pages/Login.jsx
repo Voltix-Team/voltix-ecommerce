@@ -4,7 +4,6 @@ import { auth } from "../firebase/firebaseConfig";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import Button from "../components/UI/Button";
 import Input from "../components/UI/Input";
-import { Link } from "react-router-dom";
 import { HelpCircle } from "lucide-react";
 import logo from "../assets/Logo.png";
 
@@ -29,6 +28,7 @@ const Login = () => {
     };
 
     return (
+        <div className="flex-1 flex items-center justify-center overflow-hidden">
         <div className="w-full max-w-[340px] bg-white rounded-sm shadow-2xl p-6 flex flex-col border border-white/50">
             <header className="mb-6">
                 <p className="text-blue-600 text-[9px] font-bold uppercase tracking-widest mb-1">Voltix Auth</p>
@@ -59,6 +59,7 @@ const Login = () => {
             <footer className="text-center">
                 <p className="text-slate-400 text-[10px]">No account? <Link to="/signup" className="text-blue-600 font-bold">Sign Up</Link></p>
             </footer>
+        </div>
         </div>
     );
 };
