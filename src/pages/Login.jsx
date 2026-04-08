@@ -1,78 +1,66 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { auth } from "../firebase/firebaseConfig";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import Button from "../components/UI/Button";
 import Input from "../components/UI/Input";
 import { Link } from "react-router-dom";
 import { HelpCircle } from "lucide-react";
 import logo from "../assets/Logo.png";
 
-
 const Login = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const navigate = useNavigate();
+    const [error, setError] = useState("");
+    const [formData, setFormData] = useState({ email: "", password: "" });
 
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-    // this is basic function for now -> i will use it to store theu user email and pass in the firebase 
-    const handleLogin = (e) => {
-        e.preventDefault(); // prevert the defautl behavior -> send data to the server and reload it 
-        console.log("Logging in with:", email, password);
-        // Future home of your Firebase auth logic!
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setError("");
+        try {
+            await signInWithEmailAndPassword(auth, formData.email, formData.password);
+            navigate("/"); 
+        } catch (err) {
+            setError("Invalid credentials.");
+        }
     };
 
     return (
-        <div>
-
-             {/* ── Minimal Auth Navbar ── */}
-            <header className="flex items-center justify-between px-8 py-5">
-                <Link to="/" className="text-xl font-bold text-gray-900 tracking-tight">
-                    <img src={logo} alt="Voltix" className="h-8 w-auto" />
-                </Link>
-                <div className="flex items-center gap-3 text-sm text-gray-500">
-                    <span>Power Your Future</span>
-                    <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                        <HelpCircle size={18} />
-                    </button>
-                </div>
+        <div className="w-full max-w-[340px] bg-white rounded-sm shadow-2xl p-6 flex flex-col border border-white/50">
+            <header className="mb-6">
+                <p className="text-blue-600 text-[9px] font-bold uppercase tracking-widest mb-1">Voltix Auth</p>
+                <h1 className="text-2xl font-bold text-slate-800">Log In</h1>
+                <p className="text-slate-400 text-[11px]">Hardware for the Future You.</p>
+                {error && <p className="text-red-500 text-[9px] font-bold mt-1">{error}</p>}
             </header>
-            <main>
-                {/* this is the div the hold the main screen - i will use it to center the card  */}
-                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray- to-Blue-700 p-6">
-                    {/* this is the div the hold all the card */}
-                    <div className="flex flex-col items-center justify-center bg-silverMist-200 h-fit border-2 border-deepCharcoal-200 max-w-md p-12  shadow-xl rounded-3xl" >
 
-                        {/* this is the div the hold the top section of the card (header) */}
-                        <div>
-                            <p className="text-sm text-electricBlue-400"> Voltix Authentication </p>
-                            <p className="text-l text-deepCharcoal"> Log in to Voltix</p>
-                            <p className="text-sm text-deepCharcoal"> power your future  </p>
-
-                        </div>
-                        {/* the first input that have the email  */}
-                        <Input label="Email" placeholder="Enter your email" type="email" name="email" />
-                        <Input label="Password" placeholder="••••••••" type="password" name="password" />
-
-                        <Button type="submit">Log In</Button>
-
-                        {/* this div that will hold the other option (sign up)*/}
-                        <div>
-                            <p> Don't have an account ? <a>Sign Up </a></p>
-
-                        </div>
-
-                    </div>
+            <form onSubmit={handleLogin} className="space-y-3">
+                <Input label="EMAIL" name="email" type="email" placeholder="name@company.com" onChange={handleChange} />
+                <div className="relative">
+                    <Input label="PASSWORD" name="password" type="password" placeholder="••••••••" onChange={handleChange} />
+                    <button type="button" className="absolute right-0 top-0 text-[8px] font-bold text-blue-600 uppercase">Forgot?</button>
                 </div>
-            </main>
-            {/* ── Footer ── */}
-            <footer className="flex items-center justify-between px-8 py-5 text-xs text-gray-400">
-                <span>© 2026 VOLTIX. ALL RIGHTS RESERVED.</span>
-                <div className="flex gap-6">
-                    <Link to="/terms"   className="hover:text-gray-600 transition-colors uppercase tracking-wide">Terms of Service</Link>
-                    <Link to="/privacy" className="hover:text-gray-600 transition-colors uppercase tracking-wide">Privacy Policy</Link>
-                    <Link to="/support" className="hover:text-gray-600 transition-colors uppercase tracking-wide">Contact Support</Link>
-                </div>
+                <Button className="w-full py-2.5 mt-2 text-xs font-bold">Log In</Button>
+            </form>
+
+            <div className="relative my-6 text-center">
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-50"></span></div>
+                <span className="relative bg-white px-2 text-[8px] text-slate-400 font-bold uppercase">Or log in with</span>
+            </div>
+
+            <div className="flex gap-2 mb-6">
+                <button type="button" className="flex-1 flex items-center justify-center gap-2 border border-slate-100 py-2 rounded-lg text-[9px] font-bold text-slate-500 uppercase">Google</button>
+                <button type="button" className="flex-1 flex items-center justify-center gap-2 border border-slate-100 py-2 rounded-lg text-[9px] font-bold text-slate-500 uppercase">Apple</button>
+            </div>
+
+            <footer className="text-center">
+                <p className="text-slate-400 text-[10px]">No account? <Link to="/signup" className="text-blue-600 font-bold">Sign Up</Link></p>
             </footer>
         </div>
-    )
-}
+    );
+};
 
-export default Login
-
+export default Login;
