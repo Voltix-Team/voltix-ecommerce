@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import Button from "../components/UI/Button";
 import Input from "../components/UI/Input";
+import { Link } from "react-router-dom";
+import { HelpCircle } from "lucide-react";
+import logo from "../assets/Logo.png";
 
 
 const Login = () => {
@@ -18,8 +21,17 @@ const Login = () => {
     return (
         <div>
 
-            <header >
-                placehilder navbar
+             {/* ── Minimal Auth Navbar ── */}
+            <header className="flex items-center justify-between px-8 py-5">
+                <Link to="/" className="text-xl font-bold text-gray-900 tracking-tight">
+                    <img src={logo} alt="Voltix" className="h-8 w-auto" />
+                </Link>
+                <div className="flex items-center gap-3 text-sm text-gray-500">
+                    <span>Power Your Future</span>
+                    <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                        <HelpCircle size={18} />
+                    </button>
+                </div>
             </header>
             <main>
                 {/* this is the div the hold the main screen - i will use it to center the card  */}
@@ -49,8 +61,14 @@ const Login = () => {
                     </div>
                 </div>
             </main>
-            <footer>
-                placeholder footer
+            {/* ── Footer ── */}
+            <footer className="flex items-center justify-between px-8 py-5 text-xs text-gray-400">
+                <span>© 2026 VOLTIX. ALL RIGHTS RESERVED.</span>
+                <div className="flex gap-6">
+                    <Link to="/terms"   className="hover:text-gray-600 transition-colors uppercase tracking-wide">Terms of Service</Link>
+                    <Link to="/privacy" className="hover:text-gray-600 transition-colors uppercase tracking-wide">Privacy Policy</Link>
+                    <Link to="/support" className="hover:text-gray-600 transition-colors uppercase tracking-wide">Contact Support</Link>
+                </div>
             </footer>
         </div>
     )

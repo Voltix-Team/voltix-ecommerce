@@ -1,13 +1,36 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Navbar from './components/Layout/Navbar';
+import Login from './pages/Login';
+import Home from './pages/Home';
+import ProductCard from './components/UI/Card';
+import Signup from './pages/Signup';
+import ProductDetails from './pages/ProductDetails';
+import Cart from './pages/Cart';
+import Success from './pages/Success';
+import Checkout from './pages/Checkout';
+import MainLayout from './components/Layout/MainLayout';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
-    </BrowserRouter>
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        {/* Navbar will appear on ALL pages */}
+        <Navbar />
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/success" element={<Success />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
-export default App; // THIS IS THE LINE YOU ARE MISSING!
+export default App; 
