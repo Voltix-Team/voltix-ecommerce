@@ -20,7 +20,7 @@ const Footer = () => {
     }, []);
 
     // NEW : Check if we are currently on the Login or Signup page
-    const isAuthPage =  location.pathname === "/signup" ||  location.pathname === "/";;
+    const isAuthPage =  location.pathname === "/signup" ||  location.pathname === "/Login";;
 
     return (
         <footer className="bg-[#f4f7f9] py-8 px-12 border-t border-gray-300">

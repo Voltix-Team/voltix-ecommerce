@@ -3,6 +3,7 @@ import Navbar from '../components/Layout/Navbar';
 import { Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/UI/Card';
 import { fetchProducts } from '../services/api';
+import Footer from '../components/Layout/Footer';
 
 const Home = ({ addToCart }) => {
     const [products, setProducts] = useState([]);
@@ -108,6 +109,7 @@ const Home = ({ addToCart }) => {
                     <p className="text-center py-20 text-gray-500 text-xl">No products found in this category.</p>
                 )}
             </div>
+            
         </div>
     );
 };

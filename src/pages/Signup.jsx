@@ -5,6 +5,8 @@ import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } f
 import Button from "../components/UI/Button";
 import Input from "../components/UI/Input";
 import energyBg from '../assets/left-side-image.png';
+import Home from '../pages/Home';
+
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -27,7 +29,7 @@ const Signup = () => {
         }
         try {
             await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-            navigate("/success"); 
+            navigate("/Home"); 
         } catch (error) {
             setError(error.message);
         }
@@ -37,13 +39,14 @@ const Signup = () => {
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
-            navigate("/success");
+            navigate("/Home");
         } catch (err) {
             setError(err.message);
         }
     };
 
     return (
+        <div className="flex-1 flex items-center justify-center overflow-hidden">
         <div className="w-full max-w-4xl bg-white rounded-sm shadow-none overflow-hidden flex max-h-[85vh] border border-slate-100">
             {/* LEFT SIDE */}
             <div 
@@ -101,6 +104,7 @@ const Signup = () => {
                     <p className="text-slate-400 text-[10px]">Already have an account? <Link to="/login" className="text-blue-600 font-bold hover:underline">Log In</Link></p>
                 </footer>
             </div>
+        </div>
         </div>
     );
 };
