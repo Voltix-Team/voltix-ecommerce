@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
-    "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
@@ -11,10 +10,10 @@ export default {
         electricBlue: "#007BFF",
         silverMist: "#E2E8F0",
       },
-    },
-  },
-  fontFamily: {
+      fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
       },
+    },
+  },
   plugins: [],
 }

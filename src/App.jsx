@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Navbar from './components/Layout/Navbar';
+import Footer from './components/Layout/Footer';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import ProductCard from './components/UI/Card';
@@ -15,10 +16,10 @@ import MainLayout from './components/Layout/MainLayout';
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        {/* Navbar will appear on ALL pages */}
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
 
+        <main className="flex-1 flex flex-col">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/product/:id" element={<ProductDetails />} />
@@ -28,9 +29,11 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/success" element={<Success />} />
         </Routes>
+        </main>
+        <Footer/> 
       </div>
     </Router>
   );
 }
 
-export default App; 
+export default App;
