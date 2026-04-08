@@ -1,28 +1,36 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import Navbar from './components/Layout/Navbar';
 import Login from './pages/Login';
+import Home from './pages/Home';
+import ProductCard from './components/UI/Card';
 import Signup from './pages/Signup';
-import Footer from './components/Layout/Footer';
+import ProductDetails from './pages/ProductDetails';
+import Cart from './pages/Cart';
+import Success from './pages/Success';
+import Checkout from './pages/Checkout';
+import MainLayout from './components/Layout/MainLayout';
 
 function App() {
   return (
-    <BrowserRouter>
-      {/* This main wrapper keeps the footer at the bottom without overlapping */}
-      <div className="min-h-screen flex flex-col bg-slate-100">
-        
-        {/* Your friend's Navbar will go here later */}
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        {/* Navbar will appear on ALL pages */}
+        <Navbar />
 
-        <main className="flex-grow flex items-center justify-center p-6">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/" element={<Login />} /> 
-          </Routes>
-        </main>
-
-        <Footer /> 
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/success" element={<Success />} />
+        </Routes>
       </div>
-    </BrowserRouter>
+    </Router>
   );
 }
 
-export default App;
+export default App; 

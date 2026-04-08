@@ -4,6 +4,9 @@ import { auth } from "../firebase/firebaseConfig";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import Button from "../components/UI/Button";
 import Input from "../components/UI/Input";
+import { Link } from "react-router-dom";
+import { HelpCircle } from "lucide-react";
+import logo from "../assets/Logo.png";
 
 const Login = () => {
     const navigate = useNavigate();
