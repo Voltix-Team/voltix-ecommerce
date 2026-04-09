@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, ChevronDown, ShieldCheck } from 'lucide-react';
+import Success from './Success';
 //real cart state should be added here
 const MOCK_CART = [
     {
@@ -61,7 +62,7 @@ const Checkout = () => {
     const [form, setForm] = useState({ 
         email: '', phone: '',
         fullName: '', street: '',
-        city: '', postalCode: '',
+        city: 'Amman', postalCode: '',
     });
 
     const [errors, setErrors] = useState({});
