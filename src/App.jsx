@@ -21,13 +21,9 @@ function App() {
 
         <main className="flex-1 flex flex-col">
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/cart" element={<Cart />} />
+          
           <Route path="/checkout" element={<Checkout />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/success" element={<Success />} />
+       
         </Routes>
         </main>
         <Footer/> 
