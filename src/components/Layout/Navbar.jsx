@@ -1,18 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, Menu, X, Search, HelpCircle } from 'lucide-react';
 import logo from '../../assets/Logo.png';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation } from "react-router-dom"; // Hook to check the current URL
 import { auth } from "../../firebase/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { signOut } from "firebase/auth";
+import { UserContext } from '../../pages/UserContext.jsx'; 
+
 
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
-
+    // const { user, logout } = useContext(UserContext);
+    const user1 = useContext(UserContext);
+console.log("Navbar user from context:", user1);
 
     // Cart item count — replace with real cart state
     const cartCount = 0;
