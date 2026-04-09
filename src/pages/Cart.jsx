@@ -1,53 +1,22 @@
-import { useState } from 'react';
-import { ShoppingBag, User, Trash2, ShieldCheck, Minus,Truck , Plus } from 'lucide-react';
+import { ShoppingBag, Trash2, ShieldCheck, Minus, Truck, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-
-const CartPage = () => {
+const CartPage = ({ cartItems = [], updateQuantity, removeFromCart }) => {
   const navigate = useNavigate();
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      category: 'AUDIO MASTERY',
-      name: 'Voltix Pro X1 Headphones',
-      description: 'Space Grey / Titanium Core',
-      price: 349.00,
-      quantity: 1,
-      image: 'https://placehold.co/100x100/1a1a1a/FFF?text=Headphones'
-    },
-    {
-      id: 2,
-      category: 'AUDIO MASTERY',
-      name: 'Voltix Pro X1 Headphones',
-      description: 'Space Grey / Titanium Core',
-      price: 349.00,
-      quantity: 1,
-      image: 'https://placehold.co/100x100/1a1a1a/FFF?text=Headphones'
-    },
 
-  ]);
   const discount = 0;
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const total = subtotal - discount >= 0 ? subtotal - discount : 0;
+  const total = Math.max(0, subtotal - discount);
 
-  const updateQuantity = (id, value) => {
-    setCartItems(cartItems.map(item => {
-      if (item.id === id) {
-        const newQuntity = item.quantity + value;
-        
-        return { ...item, quantity: newQuntity >0 ? newQuntity : 1 };
-      }
-      return item;
-    }));
-  }
-  const cartRemoveItem = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-  }
+  // Normalise product fields — API uses `title`, cart mock used `name`
+  const getName  = (item) => item.title || item.name || 'Product';
+  const getImage = (item) => item.thumbnail || item.image || 'https://placehold.co/100x100/1a1a1a/FFF?text=Product';
+  const getCategory = (item) => item.category || 'PRODUCT';
 
   return (
-    <div >
+    <div>
       <main className='flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12'>
-         <div className="mb-12">
+        <div className="mb-12">
           <h1 className="text-4xl sm:text-5xl font-semibold text-slate-900 mb-2">Your Cart</h1>
           <p className="text-slate-500">Precision engineered components ready for dispatch.</p>
         </div>
@@ -68,25 +37,39 @@ const CartPage = () => {
                 <div className="space-y-4">
                   {cartItems.map((item) => (
                     <div key={item.id} className="bg-slate-50/50 p-4 rounded-xl flex items-center justify-between border border-slate-100">
-                      
+
                       {/* Product Details */}
                       <div className="flex items-center space-x-6 w-1/2">
-                        <img src={item.image} alt={item.name} className="w-20 h-20 object-cover bg-black rounded-md" />
+                        <img
+                          src={getImage(item)}
+                          alt={getName(item)}
+                          className="w-20 h-20 object-cover bg-black rounded-md"
+                        />
                         <div>
-                          <p className="text-[10px] font-bold text-blue-500 tracking-wider uppercase mb-1">{item.category}</p>
-                          <h3 className="font-semibold text-slate-900 text-lg">{item.name}</h3>
-                          <p className="text-sm text-slate-500">{item.description}</p>
+                          <p className="text-[10px] font-bold text-blue-500 tracking-wider uppercase mb-1">
+                            {getCategory(item)}
+                          </p>
+                          <h3 className="font-semibold text-slate-900 text-lg">{getName(item)}</h3>
+                          {item.brand && (
+                            <p className="text-sm text-slate-500">{item.brand}</p>
+                          )}
                         </div>
                       </div>
 
                       {/* Quantity */}
                       <div className="w-1/4 flex justify-center">
                         <div className="flex items-center space-x-4 bg-white px-3 py-1.5 rounded-md border border-slate-200">
-                          <button onClick={() => updateQuantity(item.id, -1)} className="text-slate-400 hover:text-slate-600">
+                          <button
+                            onClick={() => updateQuantity(item.id, -1)}
+                            className="text-slate-400 hover:text-slate-600"
+                          >
                             <Minus className="w-4 h-4" />
                           </button>
                           <span className="font-medium text-sm w-4 text-center">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.id, 1)} className="text-slate-400 hover:text-slate-600">
+                          <button
+                            onClick={() => updateQuantity(item.id, 1)}
+                            className="text-slate-400 hover:text-slate-600"
+                          >
                             <Plus className="w-4 h-4" />
                           </button>
                         </div>
@@ -97,7 +80,10 @@ const CartPage = () => {
                         <span className="font-bold text-lg text-slate-900">
                           ${(item.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                         </span>
-                        <button onClick={() => cartRemoveItem(item.id)} className="text-red-500 hover:text-red-700 transition-colors">
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-red-500 hover:text-red-700 transition-colors"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -106,16 +92,20 @@ const CartPage = () => {
                 </div>
               </>
             ) : (
-              /*  Empty State */
+              /* Empty State */
               <div className="bg-slate-50/50 rounded-xl border border-dashed border-slate-300 py-24 flex flex-col items-center justify-center text-center">
                 <div className="bg-white p-4 rounded-full shadow-sm mb-6 border border-slate-100">
                   <ShoppingBag className="w-10 h-10 text-slate-300" />
                 </div>
                 <h3 className="text-2xl font-semibold text-slate-900 mb-2">Your cart is empty</h3>
                 <p className="text-slate-500 mb-8 max-w-md">
-                  Looks like you haven't added any precision components to your cart yet. Explore our latest technology and upgrade your setup.
+                  Looks like you haven't added any precision components to your cart yet.
+                  Explore our latest technology and upgrade your setup.
                 </p>
-                <button onClick={() => navigate('/')} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-md transition-colors text-sm tracking-wide">
+                <button
+                  onClick={() => navigate('/')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-md transition-colors text-sm tracking-wide"
+                >
                   CONTINUE SHOPPING
                 </button>
               </div>
@@ -126,7 +116,7 @@ const CartPage = () => {
           <div className="lg:w-96 flex-shrink-0">
             <div className="bg-slate-50 p-8 rounded-xl border border-slate-100">
               <h2 className="text-xl font-semibold text-slate-900 mb-8">Order Summary</h2>
-              
+
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-sm font-medium text-slate-600">
                   <span>SUBTOTAL</span>
@@ -152,11 +142,13 @@ const CartPage = () => {
                 </div>
               </div>
 
-              <button 
+              {/* ✅ Navigates to /checkout */}
+              <button
                 disabled={cartItems.length === 0}
+                onClick={() => navigate('/checkout')}
                 className={`w-full font-semibold py-4 rounded-md transition-colors mb-6 text-sm tracking-wide ${
-                  cartItems.length > 0 
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                  cartItems.length > 0
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
                     : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                 }`}
               >
@@ -184,9 +176,8 @@ const CartPage = () => {
           </div>
         </div>
       </main>
-   
     </div>
-
-  )
+  );
 };
+
 export default CartPage;

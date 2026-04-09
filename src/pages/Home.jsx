@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/Layout/Navbar';
 import { Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/UI/Card';
 import { fetchProducts } from '../services/api';
-import Footer from '../components/Layout/Footer';
 
 const Home = ({ addToCart }) => {
     const [products, setProducts] = useState([]);
@@ -15,16 +13,16 @@ const Home = ({ addToCart }) => {
     const activeCategory = searchParams.get('category') || 'all';
 
     const setActiveCategory = (cat) => {
-    setSearchParams(prev => {
-        const next = new URLSearchParams(prev);
-        if (cat === 'all') {
-            next.delete('category');
-        } else {
-            next.set('category', cat);
-        }
-        return next;
-    });
-};
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            if (cat === 'all') {
+                next.delete('category');
+            } else {
+                next.set('category', cat);
+            }
+            return next;
+        });
+    };
 
     useEffect(() => {
         setLoading(true);
@@ -38,7 +36,7 @@ const Home = ({ addToCart }) => {
         let result = [...products];
 
         if (searchQuery) {
-            result = result.filter(p => 
+            result = result.filter(p =>
                 p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.brand.toLowerCase().includes(searchQuery.toLowerCase())
             );
@@ -51,11 +49,10 @@ const Home = ({ addToCart }) => {
         setFilteredProducts(result);
     }, [products, searchQuery, activeCategory]);
 
-
     const categories = ['all', 'smartphones', 'laptops', 'tablets', 'mobile-accessories'];
 
     if (loading) {
-        return <div className="text-center py-20 text-xl">Loading Products...</div>
+        return <div className="text-center py-20 text-xl">Loading Products...</div>;
     }
 
     return (
@@ -67,7 +64,7 @@ const Home = ({ addToCart }) => {
                     <p className="text-2xl max-w-2xl mx-auto opacity-90">
                         Experience the next generation of premium electronics
                     </p>
-                    <button 
+                    <button
                         onClick={() => document.getElementById('products').scrollIntoView({ behavior: 'smooth' })}
                         className="mt-10 bg-white text-blue-600 px-10 py-4 rounded-2xl font-semibold text-lg hover:bg-gray-100 transition"
                     >
@@ -76,7 +73,8 @@ const Home = ({ addToCart }) => {
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto px-6 py-12">
+            {/* ✅ id="products" added so scrollIntoView works */}
+            <div id="products" className="max-w-6xl mx-auto px-6 py-12">
                 {/* category filters */}
                 <div className="flex flex-wrap gap-3 mb-10 justify-center">
                     {categories.map(cat => (
@@ -84,12 +82,12 @@ const Home = ({ addToCart }) => {
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
                             className={`px-6 py-3 rounded-3xl font-medium transition-all ${
-                                activeCategory === cat 
-                                ? 'bg-blue-600 text-white shadow'
-                                : 'bg-white border border-gray-200 hover:bg-gray-50'
+                                activeCategory === cat
+                                    ? 'bg-blue-600 text-white shadow'
+                                    : 'bg-white border border-gray-200 hover:bg-gray-50'
                             }`}
                         >
-                            {cat === 'all' ? 'All Products' : cat.charAt(0).toUpperCase() +cat.slice(1)}
+                            {cat === 'all' ? 'All Products' : cat.charAt(0).toUpperCase() + cat.slice(1)}
                         </button>
                     ))}
                 </div>
@@ -109,7 +107,6 @@ const Home = ({ addToCart }) => {
                     <p className="text-center py-20 text-gray-500 text-xl">No products found in this category.</p>
                 )}
             </div>
-            
         </div>
     );
 };

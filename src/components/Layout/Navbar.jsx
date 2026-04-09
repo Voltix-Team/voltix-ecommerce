@@ -2,24 +2,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, Menu, X, Search, HelpCircle } from 'lucide-react';
 import logo from '../../assets/Logo.png';
 import React, { useState, useEffect, useContext } from "react";
-import { useLocation } from "react-router-dom"; // Hook to check the current URL
+import { useLocation } from "react-router-dom";
 import { auth } from "../../firebase/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { signOut } from "firebase/auth";
-import { UserContext } from '../../pages/UserContext.jsx'; 
+import { UserContext } from '../../pages/UserContext.jsx';
 
-
-
-const Navbar = () => {
+const Navbar = ({ cartCount = 0 }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
-    // const { user, logout } = useContext(UserContext);
     const user1 = useContext(UserContext);
-console.log("Navbar user from context:", user1);
-
-    // Cart item count — replace with real cart state
-    const cartCount = 0;
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -35,18 +28,14 @@ console.log("Navbar user from context:", user1);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            if (firebaseUser) {
-                setUser(firebaseUser);
-            } else {
-                setUser(null);
-            }
+            setUser(firebaseUser ? firebaseUser : null);
         });
         return () => unsubscribe();
     }, []);
 
     const isAuthPage = location.pathname === "/signup" || location.pathname === "/login";
 
-    // Auth page navbar (login/signup) — minimal header
+    // Auth page navbar — minimal header, unchanged
     if (isAuthPage) {
         return (
             <header className="flex items-center justify-between px-8 py-3 bg-[#f4f7f9] border-b border-gray-200">
@@ -63,25 +52,20 @@ console.log("Navbar user from context:", user1);
         );
     }
 
-    // Authenticated navbar — profile & logout
+    // Authenticated navbar
     if (user) {
         return (
             <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex items-center justify-between h-20 gap-6">
+
+                        {/* Logo — left */}
                         <Link to="/" className="flex items-center gap-3 flex-shrink-0">
                             <img src={logo} alt="Voltix" className="h-8 w-auto" />
                         </Link>
 
-                        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700 flex-shrink-0">
-                            <Link to="/" className="hover:text-blue-600 transition-colors duration-150">Home</Link>
-                            <Link to="/shop" className="hover:text-blue-600 transition-colors duration-150">Shop</Link>
-                            <Link to="/audio" className="hover:text-blue-600 transition-colors duration-150">Audio</Link>
-                            <Link to="/computing" className="hover:text-blue-600 transition-colors duration-150">Computing</Link>
-                            <Link to="/mobile" className="hover:text-blue-600 transition-colors duration-150">Mobile</Link>
-                        </div>
-
-                        <form onSubmit={handleSearch} className="hidden md:block flex-1 max-w-xl mx-8">
+                        {/* Search bar — center, wider */}
+                        <form onSubmit={handleSearch} className="hidden md:block flex-1 mx-8">
                             <div className="relative">
                                 <input
                                     type="text"
@@ -99,6 +83,7 @@ console.log("Navbar user from context:", user1);
                             </div>
                         </form>
 
+                        {/* Right side — cart, account, logout */}
                         <div className="flex items-center gap-5 flex-shrink-0">
                             <Link to="/cart" className="relative text-gray-700 hover:text-blue-600 transition-colors duration-150">
                                 <ShoppingCart size={22} />
@@ -108,22 +93,20 @@ console.log("Navbar user from context:", user1);
                                     </span>
                                 )}
                             </Link>
-                            <div className="flex items-center gap-4">
-                                <button
-                                    onClick={() => navigate('/account')}
-                                    className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-150"
-                                >
-                                    <User size={22} />
-                                    <span className="hidden lg:block text-sm font-medium">My Account</span>
-                                </button>
-                                <button
-                                    onClick={() => signOut(auth).then(() => navigate('/login'))}
-                                    className="text-gray-400 hover:text-red-500 transition-colors duration-150"
-                                    title="Log out"
-                                >
-                                    <LogOut size={20} />
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => navigate('/Profile')}
+                                className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-150"
+                            >
+                                <User size={22} />
+                                <span className="hidden lg:block text-sm font-medium">My Account</span>
+                            </button>
+                            <button
+                                onClick={() => signOut(auth).then(() => navigate('/login'))}
+                                className="text-gray-400 hover:text-red-500 transition-colors duration-150"
+                                title="Log out"
+                            >
+                                <LogOut size={20} />
+                            </button>
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                                 className="md:hidden text-gray-700 hover:text-blue-600 transition-colors"
@@ -135,6 +118,7 @@ console.log("Navbar user from context:", user1);
                     </div>
                 </div>
 
+                {/* Mobile menu */}
                 {isMenuOpen && (
                     <div className="md:hidden bg-white border-t border-gray-100">
                         <div className="px-6 pt-4">
@@ -154,37 +138,25 @@ console.log("Navbar user from context:", user1);
                                 </div>
                             </form>
                         </div>
-                        <div className="px-6 py-6 flex flex-col gap-5 text-base font-medium text-gray-700">
-                            <Link to="/" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Home</Link>
-                            <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Shop</Link>
-                            <Link to="/audio" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Audio</Link>
-                            <Link to="/computing" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Computing</Link>
-                            <Link to="/mobile" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Mobile</Link>
-                        </div>
                     </div>
                 )}
             </nav>
         );
     }
 
-    // Guest navbar (not authenticated, not on auth page) — login/signup buttons
+    // Guest navbar
     return (
         <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="flex items-center justify-between h-20 gap-6">
+
+                    {/* Logo — left */}
                     <Link to="/" className="flex items-center gap-3 flex-shrink-0">
                         <img src={logo} alt="Voltix" className="h-8 w-auto" />
                     </Link>
 
-                    <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700 flex-shrink-0">
-                        <Link to="/" className="hover:text-blue-600 transition-colors duration-150">Home</Link>
-                        <Link to="/shop" className="hover:text-blue-600 transition-colors duration-150">Shop</Link>
-                        <Link to="/audio" className="hover:text-blue-600 transition-colors duration-150">Audio</Link>
-                        <Link to="/computing" className="hover:text-blue-600 transition-colors duration-150">Computing</Link>
-                        <Link to="/mobile" className="hover:text-blue-600 transition-colors duration-150">Mobile</Link>
-                    </div>
-
-                    <form onSubmit={handleSearch} className="hidden md:block flex-1 max-w-xl mx-8">
+                    {/* Search bar — center, wider */}
+                    <form onSubmit={handleSearch} className="hidden md:block flex-1 mx-8">
                         <div className="relative">
                             <input
                                 type="text"
@@ -202,6 +174,7 @@ console.log("Navbar user from context:", user1);
                         </div>
                     </form>
 
+                    {/* Right side — cart, login, signup */}
                     <div className="flex items-center gap-5 flex-shrink-0">
                         <Link to="/cart" className="relative text-gray-700 hover:text-blue-600 transition-colors duration-150">
                             <ShoppingCart size={22} />
@@ -236,6 +209,7 @@ console.log("Navbar user from context:", user1);
                 </div>
             </div>
 
+            {/* Mobile menu */}
             {isMenuOpen && (
                 <div className="md:hidden bg-white border-t border-gray-100">
                     <div className="px-6 pt-4">
@@ -255,28 +229,21 @@ console.log("Navbar user from context:", user1);
                             </div>
                         </form>
                     </div>
-                    <div className="px-6 py-6 flex flex-col gap-5 text-base font-medium text-gray-700">
-                        <Link to="/" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Home</Link>
-                        <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Shop</Link>
-                        <Link to="/audio" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Audio</Link>
-                        <Link to="/computing" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Computing</Link>
-                        <Link to="/mobile" onClick={() => setIsMenuOpen(false)} className="hover:text-blue-600 transition-colors">Mobile</Link>
-                        <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
-                            <Link
-                                to="/login"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-center py-2.5 rounded-2xl border border-gray-200 text-sm font-semibold text-gray-700 hover:border-blue-500 hover:text-blue-600 transition-colors"
-                            >
-                                Login
-                            </Link>
-                            <Link
-                                to="/signup"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="text-center py-2.5 rounded-2xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
-                            >
-                                Sign Up
-                            </Link>
-                        </div>
+                    <div className="px-6 py-6 flex flex-col gap-3">
+                        <Link
+                            to="/login"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="text-center py-2.5 rounded-2xl border border-gray-200 text-sm font-semibold text-gray-700 hover:border-blue-500 hover:text-blue-600 transition-colors"
+                        >
+                            Login
+                        </Link>
+                        <Link
+                            to="/signup"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="text-center py-2.5 rounded-2xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+                        >
+                            Sign Up
+                        </Link>
                     </div>
                 </div>
             )}

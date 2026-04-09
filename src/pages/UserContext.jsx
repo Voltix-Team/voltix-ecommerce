@@ -1,38 +1,56 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebase/firebaseConfig';
+import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 
-// Create the context
 export const UserContext = createContext(undefined);
 
-// Create a provider component
+const buildUser = (firebaseUser) => ({
+    uid: firebaseUser.uid,
+    name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+    email: firebaseUser.email,
+    phone: '',
+    avatar: firebaseUser.photoURL || null,
+    memberSince: firebaseUser.metadata?.creationTime
+        ? new Date(firebaseUser.metadata.creationTime).toLocaleDateString('en-US', {
+            month: 'long', year: 'numeric'
+          })
+        : 'Unknown',
+    address: { street: '', suite: '', city: '', state: '', zip: '', country: '' },
+});
+
 export const UserProvider = ({ children }) => {
     const navigate = useNavigate();
-  // Mock user data and replace with data from the backend
-  const [user, setUser] = useState({
-    name: 'Jonathan Sterling',
-    memberSince: 'January 2024',
-    email: 'j.sterling@voltix-industries.com',
-    phone: '+1 (555) 012-3456',
-    avatar: '#',
-    address: {
-      street: '7824 Industrial Parkway',
-      suite: 'Suite 400, Tech District',
-      city: 'San Francisco',
-      state: 'CA',
-      zip: '94103',
-      country: 'United States'
-    }
-  });
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-  const logout = () => {
-    console.log("Logging out...");
-    setUser(null);
-    navigate('/');
-  };
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+            setUser(firebaseUser ? buildUser(firebaseUser) : null);
+            setLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
 
-  return (
-    <UserContext.Provider value={{ user, logout }}>
-      {children}
-    </UserContext.Provider>
-  );
+    // Updates Firebase Auth displayName only — no Firestore needed
+    const updateUser = async (fields) => {
+        const firebaseUser = auth.currentUser;
+        if (!firebaseUser) return;
+        if (fields.name && fields.name !== firebaseUser.displayName) {
+            await updateProfile(firebaseUser, { displayName: fields.name });
+        }
+        setUser(prev => ({ ...prev, ...fields }));
+    };
+
+    const logout = async () => {
+        await signOut(auth);
+        setUser(null);
+        navigate('/');
+    };
+
+    return (
+        <UserContext.Provider value={{ user, logout, loading, updateUser }}>
+            {children}
+        </UserContext.Provider>
+    );
 };
