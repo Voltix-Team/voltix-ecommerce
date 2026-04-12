@@ -1,6 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Edit, MapPin, CheckCircle2, X, Phone, User, Home } from 'lucide-react';
 import { UserContext } from './UserContext';
+import OrderCard from '../components/UI/OrderCard';
 
 // ── small reusable field ──────────────────────────────────────────────────────
 const Field = ({ label, value, onChange, placeholder = '', type = 'text', error }) => (
@@ -32,6 +33,23 @@ const ProfilePage = () => {
 
     // form state — seeded from current user when modal opens
     const [form, setForm] = useState({});
+
+    // previous orders loaded from localStorage
+    const [orders, setOrders] = useState([]);
+
+    useEffect(() => {
+        if (!user?.email) return;
+        try {
+            const all = JSON.parse(localStorage.getItem('voltix_orders')) || [];
+            setOrders(
+                all
+                    .filter(o => o.userEmail === user.email)
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            );
+        } catch {
+            setOrders([]);
+        }
+    }, [user]);
 
     const openModal = () => {
         setForm({
@@ -221,6 +239,20 @@ const ProfilePage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* ── order history ────────────────────────────────────────────── */}
+            <section className="mt-12">
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Order History</h2>
+                {orders.length === 0 ? (
+                    <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+                        <p className="text-sm text-gray-400">You haven't placed any orders yet.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {orders.map(o => <OrderCard key={o.id} order={o} />)}
+                    </div>
+                )}
+            </section>
 
             {/* ── edit modal ───────────────────────────────────────────────── */}
             {modalOpen && (

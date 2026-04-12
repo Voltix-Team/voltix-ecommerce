@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 
@@ -13,10 +13,22 @@ import Success from './pages/Success';
 import Checkout from './pages/Checkout';
 import ProfilePage from './pages/Profile';
 import { UserProvider } from './pages/UserContext';
+import OrderItemRow from './components/UI/OrderItemRow';
 
 function App() {
   const [cartItems, setCartItems] = useState([]);
-  const [toast, setToast] = useState(null); // { name, image }
+  const [toast, setToast] = useState(null);
+
+  // ✅ Load cart from localStorage
+  useEffect(() => {
+    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+    setCartItems(storedCart);
+  }, []);
+
+  // ✅ Save cart to localStorage
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   const showToast = (product) => {
     setToast(product);
@@ -26,6 +38,7 @@ function App() {
   const addToCart = (product) => {
     setCartItems(prev => {
       const existing = prev.find(item => item.id === product.id);
+
       if (existing) {
         return prev.map(item =>
           item.id === product.id
@@ -33,8 +46,10 @@ function App() {
             : item
         );
       }
+
       return [...prev, { ...product, quantity: 1 }];
     });
+
     showToast(product);
   };
 
@@ -52,7 +67,10 @@ function App() {
     setCartItems(prev => prev.filter(item => item.id !== id));
   };
 
-  const clearCart = () => setCartItems([]);
+  const clearCart = () => {
+    setCartItems([]);
+    localStorage.removeItem("cart"); // optional but cleaner
+  };
 
   const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
@@ -66,6 +84,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home addToCart={addToCart} />} />
               <Route path="/product/:id" element={<ProductDetails addToCart={addToCart} />} />
+
               <Route
                 path="/cart"
                 element={
@@ -76,25 +95,31 @@ function App() {
                   />
                 }
               />
+
               <Route
                 path="/checkout"
-                element={<Checkout cartItems={cartItems} clearCart={clearCart} />}
+                element={
+                  <Checkout
+                    cartItems={cartItems}
+                    clearCart={clearCart}
+                  />
+                }
               />
+
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/success" element={<Success />} />
-              <Route path="/Profile" element={<ProfilePage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </main>
         </UserProvider>
+
         <Footer />
 
-        {/* ✅ Toast notification — sits outside UserProvider/Router so it's always on top */}
-        <div
-          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
-            toast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-          }`}
-        >
+        {/* Toast */}
+        <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
+          toast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}>
           {toast && (
             <div className="flex items-center gap-3 bg-gray-900 text-white px-5 py-3.5 rounded-2xl shadow-xl">
               <img
@@ -103,10 +128,10 @@ function App() {
                 className="w-9 h-9 rounded-lg object-cover bg-gray-700"
               />
               <div>
-                <p className="text-xs font-bold leading-tight">{toast.title || toast.name}</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">Added to cart</p>
+                <p className="text-xs font-bold">{toast.title || toast.name}</p>
+                <p className="text-[11px] text-gray-400">Added to cart</p>
               </div>
-              <CheckCircle2 size={18} className="text-green-400 ml-1 flex-shrink-0" />
+              <CheckCircle2 size={18} className="text-green-400" />
             </div>
           )}
         </div>
