@@ -1,39 +1,40 @@
-// src/services/api.js
-const BASE_URL = 'https://dummyjson.com';
+import axios from 'axios';
 
-// Fetch products (only electronics)
+const api = axios.create({
+    baseURL: 'https://dummyjson.com',
+    timeout: 10000,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Fetch products (only electronics categories)
 export const fetchProducts = async (category = 'all') => {
-  try {
-    let url;
-
-    if (category === 'all') {
-      const categories = ['smartphones', 'laptops', 'tablets', 'mobile-accessories'];
-      const promises = categories.map(cat => 
-        fetch(`${BASE_URL}/products/category/${cat}`).then(res => res.json())
-      );
-      
-      const results = await Promise.all(promises);
-      return results.flatMap(data => data.products || []);
-      
-    } else {
-      const res = await fetch(`${BASE_URL}/products/category/${category}`);
-      const data = await res.json();
-      return data.products || [];
+    try {
+        if (category === 'all') {
+            const categories = ['smartphones', 'laptops', 'tablets', 'mobile-accessories'];
+            const promises = categories.map(cat =>
+                api.get(`/products/category/${cat}`)
+            );
+            const results = await Promise.all(promises);
+            return results.flatMap(res => res.data.products || []);
+        } else {
+            const { data } = await api.get(`/products/category/${category}`);
+            return data.products || [];
+        }
+    } catch (error) {
+        console.error('Failed to fetch products:', error.message);
+        return [];
     }
-  } catch (error) {
-    console.error("Failed to fetch products:", error);
-    return [];
-  }
 };
 
 // Fetch single product by ID (for Product Details page)
 export const fetchProductById = async (id) => {
-  try {
-    const res = await fetch(`${BASE_URL}/products/${id}`);
-    if (!res.ok) throw new Error('Product not found');
-    return await res.json();
-  } catch (error) {
-    console.error("Failed to fetch product by ID:", error);
-    return null;
-  }
+    try {
+        const { data } = await api.get(`/products/${id}`);
+        return data;
+    } catch (error) {
+        console.error('Failed to fetch product by ID:', error.message);
+        return null;
+    }
 };
