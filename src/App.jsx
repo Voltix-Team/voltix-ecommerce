@@ -12,6 +12,7 @@ import Cart from './pages/Cart';
 import Success from './pages/Success';
 import Checkout from './pages/Checkout';
 import ProfilePage from './pages/Profile';
+import Wishlist from './pages/Wishlist';
 import { UserProvider } from './pages/UserContext';
 import OrderItemRow from './components/UI/OrderItemRow';
 
@@ -110,6 +111,7 @@ function App() {
               <Route path="/signup" element={<Signup />} />
               <Route path="/success" element={<Success />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/wishlist" element={<Wishlist addToCart={addToCart} />} />
             </Routes>
           </main>
         </UserProvider>
