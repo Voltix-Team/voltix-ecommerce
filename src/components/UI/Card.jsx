@@ -1,7 +1,34 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Heart } from "lucide-react";
+
+const WISHLIST_KEY = "wishlist";
+
+const getWishlist = () => {
+    try {
+        return JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
+    } catch {
+        return [];
+    }
+};
 
 const ProductCard = ({ product, addToCart }) => {
-    const discountedPrice = product.discountPercentage 
+    const [isFavorite, setIsFavorite] = useState(() =>
+        getWishlist().some((item) => item.id === product.id)
+    );
+
+    const toggleFavorite = (e) => {
+        e.preventDefault();
+        const wishlist = getWishlist();
+        const exists = wishlist.some((item) => item.id === product.id);
+        const updated = exists
+            ? wishlist.filter((item) => item.id !== product.id)
+            : [...wishlist, product];
+        localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
+        setIsFavorite(!exists);
+    };
+
+    const discountedPrice = product.discountPercentage
         ? Math.round(product.price * ( 1 - product.discountPercentage / 100))
         : product.price;
 
@@ -19,6 +46,16 @@ const ProductCard = ({ product, addToCart }) => {
                             - {Math.round(product.discountPercentage)}%
                         </div>
                     )}
+                    <button
+                        type="button"
+                        onClick={toggleFavorite}
+                        aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                        className="absolute top-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full shadow-sm transition-colors"
+                    >
+                        <Heart
+                            className={`w-5 h-5 transition-colors ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"}`}
+                        />
+                    </button>
                 </div>
             </Link>
 

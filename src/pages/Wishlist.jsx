@@ -1,0 +1,106 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Heart, Trash2, ShoppingCart } from "lucide-react";
+
+const WISHLIST_KEY = "wishlist";
+
+const Wishlist = ({ addToCart }) => {
+    const navigate = useNavigate();
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+        const stored = JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
+        setItems(stored);
+    }, []);
+
+    const removeFromWishlist = (id) => {
+        const updated = items.filter((item) => item.id !== id);
+        setItems(updated);
+        localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
+    };
+
+    const handleAddToCart = (item) => {
+        if (addToCart) addToCart(item);
+    };
+
+    if (items.length === 0) {
+        return (
+            <div className="text-center py-24">
+                <Heart className="mx-auto w-12 h-12 text-gray-300 mb-4" />
+                <h2 className="text-2xl font-semibold">Your wishlist is empty</h2>
+                <p className="text-gray-500 mt-2">Tap the heart on any product to save it here.</p>
+                <button
+                    onClick={() => navigate("/")}
+                    className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md"
+                >
+                    Browse Products
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-7xl mx-auto p-6">
+            <div className="flex items-center justify-between mb-8">
+                <h1 className="text-3xl font-bold">My Wishlist</h1>
+                <span className="text-gray-500">{items.length} {items.length === 1 ? "item" : "items"}</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {items.map((item) => {
+                    const discountedPrice = item.discountPercentage
+                        ? Math.round(item.price * (1 - item.discountPercentage / 100))
+                        : item.price;
+
+                    return (
+                        <div key={item.id} className="bg-white border border-gray-100 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300">
+                            <div
+                                className="relative h-56 bg-gray-50 overflow-hidden cursor-pointer"
+                                onClick={() => navigate(`/product/${item.id}`)}
+                            >
+                                <img
+                                    src={item.thumbnail || item.image}
+                                    alt={item.title || item.name}
+                                    className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        removeFromWishlist(item.id);
+                                    }}
+                                    aria-label="Remove from wishlist"
+                                    className="absolute top-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full shadow-sm transition-colors"
+                                >
+                                    <Trash2 className="w-5 h-5 text-red-500" />
+                                </button>
+                            </div>
+
+                            <div className="p-5">
+                                <p className="text-xs text-gray-500 font-medium">{item.brand}</p>
+                                <h3 className="font-semibold text-lg mt-1 line-clamp-2 min-h-[52px]">
+                                    {item.title || item.name}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-3">
+                                    <span className="text-2xl font-bold text-gray-900">${discountedPrice}</span>
+                                    {item.discountPercentage > 0 && (
+                                        <span className="text-sm text-gray-400 line-through">${item.price}</span>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => handleAddToCart(item)}
+                                    className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-medium transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <ShoppingCart size={18} />
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+export default Wishlist;

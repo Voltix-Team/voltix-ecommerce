@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Menu, X, Search, HelpCircle } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Menu, X, Search, HelpCircle, Heart } from 'lucide-react';
 import logo from '../../assets/Logo.png';
 import React, { useState, useEffect, useContext } from "react";
 import { useLocation } from "react-router-dom";
@@ -83,8 +83,15 @@ const Navbar = ({ cartCount = 0 }) => {
                             </div>
                         </form>
 
-                        {/* Right side — cart, account, logout */}
+                        {/* Right side — wishlist, cart, account, logout */}
                         <div className="flex items-center gap-5 flex-shrink-0">
+                            <Link
+                                to="/wishlist"
+                                className="text-gray-700 hover:text-red-500 transition-colors duration-150"
+                                title="Wishlist"
+                            >
+                                <Heart size={22} />
+                            </Link>
                             <Link to="/cart" className="relative text-gray-700 hover:text-blue-600 transition-colors duration-150">
                                 <ShoppingCart size={22} />
                                 {cartCount > 0 && (
@@ -174,8 +181,15 @@ const Navbar = ({ cartCount = 0 }) => {
                         </div>
                     </form>
 
-                    {/* Right side — cart, login, signup */}
+                    {/* Right side — wishlist, cart, login, signup */}
                     <div className="flex items-center gap-5 flex-shrink-0">
+                        <Link
+                            to="/wishlist"
+                            className="text-gray-700 hover:text-red-500 transition-colors duration-150"
+                            title="Wishlist"
+                        >
+                            <Heart size={22} />
+                        </Link>
                         <Link to="/cart" className="relative text-gray-700 hover:text-blue-600 transition-colors duration-150">
                             <ShoppingCart size={22} />
                             {cartCount > 0 && (

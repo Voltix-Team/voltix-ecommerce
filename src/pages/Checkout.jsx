@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Swal from "sweetalert2";
 import { Link, useNavigate } from "react-router-dom";
 import { Lock, ChevronDown, ShieldCheck } from "lucide-react";
 
@@ -23,10 +24,9 @@ const TextInput = ({ error, className = "", ...props }) => (
   <input
     className={`w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-300
       outline-none transition-all duration-150
-      ${
-        error
-          ? "border-red-300 bg-red-50 focus:border-red-400"
-          : "border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-50"
+      ${error
+        ? "border-red-300 bg-red-50 focus:border-red-400"
+        : "border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-50"
       }
       ${className}`}
     {...props}
@@ -72,16 +72,62 @@ const Checkout = ({ cartItems = [], clearCart }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (cartItems.length === 0) {
+      Swal.fire({
+        title: "Your cart is empty!",
+        text: "Add some items before trying to checkout.",
+        icon: "warning",
+        confirmButtonColor: "#2563eb",
+      });
+      return;
+    }
     const errs = validate();
     if (Object.keys(errs).length) {
       setErrors(errs);
       return;
     }
+
     setErrors({});
     setLoading(true);
+
+    // 1. Create the Order Object
+    const newOrder = {
+      id: `ORD-${Date.now()}`, // Unique ID based on time
+      userEmail: form.email,
+      createdAt: Date.now(),
+      items: cartItems,
+      subtotal: subtotal,
+      total: total,
+      shipping: {
+        fullName: form.fullName,
+        street: form.street,
+        city: form.city,
+        postalCode: form.postalCode,
+        phone: form.phone
+      },
+      status: "Processing"
+    };
+
+    // 2. Save to Local Storage
+    try {
+      // Get existing orders or start with an empty array
+      const existingOrders = JSON.parse(localStorage.getItem("voltix_orders") || "[]");
+
+      // Add the new order to the start of the list
+      const updatedOrders = [newOrder, ...existingOrders];
+
+      // Save back to localStorage
+      localStorage.setItem("voltix_orders", JSON.stringify(updatedOrders));
+    } catch (err) {
+      console.error("Failed to save order:", err);
+    }
+
+    // Simulate API delay
     await new Promise((r) => setTimeout(r, 1400));
+
     setLoading(false);
-    if (clearCart) clearCart(); // ✅ wipe the cart
+    if (clearCart) clearCart();
     navigate("/success");
   };
 
