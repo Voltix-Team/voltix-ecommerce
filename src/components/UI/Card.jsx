@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
+import StarRating from "./StarRating";
 
 const WISHLIST_KEY = "wishlist";
 
@@ -29,14 +30,14 @@ const ProductCard = ({ product, addToCart }) => {
     };
 
     const discountedPrice = product.discountPercentage
-        ? Math.round(product.price * ( 1 - product.discountPercentage / 100))
+        ? Math.round(product.price * (1 - product.discountPercentage / 100))
         : product.price;
 
     return (
         <div className="group bg-white border border border-gray-100 rounded-3xl overflow-hidden hover:shadow-x1 transition-all duration-300">
             <Link to={`/product/${product.id}`}>
                 <div className="relative h-64 bg-gray-50 overflow-hidden">
-                    <img 
+                    <img
                         src={product.thumbnail}
                         alt={product.title}
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
@@ -66,6 +67,12 @@ const ProductCard = ({ product, addToCart }) => {
                         {product.title}
                     </h3>
                 </Link>
+
+                {/* star rating */}
+                <div className="mt-2">
+                    <StarRating rating={product.rating} size={4} />
+                </div>
+
                 <div className="flex items-center gap-2 mt-4">
                     <span className="text-2xl font-bold text-gray-900">
                         ${discountedPrice}
@@ -87,7 +94,7 @@ const ProductCard = ({ product, addToCart }) => {
                 </button>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default ProductCard;
