@@ -8,18 +8,25 @@ const api = axios.create({
     },
 });
 
-// Fetch products (only electronics categories)
+// Fetch products — all electronics or by specific category
 export const fetchProducts = async (category = 'all') => {
     try {
         if (category === 'all') {
-            const categories = ['smartphones', 'laptops', 'tablets', 'mobile-accessories'];
-            const promises = categories.map(cat =>
-                api.get(`/products/category/${cat}`)
-            );
-            const results = await Promise.all(promises);
-            return results.flatMap(res => res.data.products || []);
+            // Fetch each electronics category separately with limit
+            const smartphones   = await api.get('/products/category/smartphones?limit=100');
+            const laptops       = await api.get('/products/category/laptops?limit=100');
+            const tablets       = await api.get('/products/category/tablets?limit=100');
+            const accessories   = await api.get('/products/category/mobile-accessories?limit=100');
+
+            // Combine all into one array
+            return [
+                ...smartphones.data.products,
+                ...laptops.data.products,
+                ...tablets.data.products,
+                ...accessories.data.products,
+            ];
         } else {
-            const { data } = await api.get(`/products/category/${category}`);
+            const { data } = await api.get(`/products/category/${category}?limit=100`);
             return data.products || [];
         }
     } catch (error) {
