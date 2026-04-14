@@ -24,18 +24,18 @@ const TextInput = ({ error, className = '', ...props }) => (
 const FieldErr = ({ msg }) =>
     msg ? <p className="text-[11px] text-red-500 mt-1">{msg}</p> : null;
 
-// ── card number formatter: adds space every 4 digits ─────────────────────────
+//  card number formatter: adds space every 4 digits 
 const formatCardNumber = (value) =>
     value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
 
-// ── expiry formatter: MM/YY ───────────────────────────────────────────────────
+//  expiry formatter: MM/YY 
 const formatExpiry = (value) => {
     const digits = value.replace(/\D/g, '').slice(0, 4);
     if (digits.length >= 3) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
     return digits;
 };
 
-// ── detect card brand from first digit ───────────────────────────────────────
+//  detect card brand from first digit
 const detectBrand = (number) => {
     const n = number.replace(/\s/g, '');
     if (/^4/.test(n)) return 'Visa';
@@ -76,7 +76,7 @@ const Checkout = ({ cartItems = [], clearCart }) => {
     const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
     const total    = subtotal;
 
-    // ── validation ────────────────────────────────────────────────────────────
+    //  validation 
     const validate = () => {
         const e = {};
 
