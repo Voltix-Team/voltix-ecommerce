@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart, selectCartCount } from './redux/cartSlice';
+
 
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
@@ -13,67 +16,25 @@ import Success from './pages/Success';
 import Checkout from './pages/Checkout';
 import ProfilePage from './pages/Profile';
 import Wishlist from './pages/Wishlist';
+import Orders from './pages/Orders'; 
 import { UserProvider } from './pages/UserContext';
-import OrderItemRow from './components/UI/OrderItemRow';
+
+const ORDERS_KEY = 'voltix_orders';
 
 function App() {
-  const [cartItems, setCartItems] = useState([]);
+  const dispatch = useDispatch();
+  const cartCount = useSelector(selectCartCount);
   const [toast, setToast] = useState(null);
-
-  // ✅ Load cart from localStorage
-  useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    setCartItems(storedCart);
-  }, []);
-
-  // ✅ Save cart to localStorage
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cartItems));
-  }, [cartItems]);
 
   const showToast = (product) => {
     setToast(product);
     setTimeout(() => setToast(null), 2500);
   };
 
-  const addToCart = (product) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
-
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-
-      return [...prev, { ...product, quantity: 1 }];
-    });
-
+  const handleAddToCart = (product) => {
+    dispatch(addToCart(product));
     showToast(product);
-  };
-
-  const updateQuantity = (id, delta) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    );
-  };
-
-  const removeFromCart = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
-  };
-
-  const clearCart = () => {
-    setCartItems([]);
-    localStorage.removeItem("cart"); // optional but cleaner
-  };
-
-  const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
+  }
 
   return (
     <Router>
@@ -83,34 +44,15 @@ function App() {
 
           <main className="flex-1 flex flex-col">
             <Routes>
-              <Route path="/" element={<Home addToCart={addToCart} />} />
-              <Route path="/product/:id" element={<ProductDetails addToCart={addToCart} />} />
-
-              <Route
-                path="/cart"
-                element={
-                  <Cart
-                    cartItems={cartItems}
-                    updateQuantity={updateQuantity}
-                    removeFromCart={removeFromCart}
-                  />
-                }
-              />
-
-              <Route
-                path="/checkout"
-                element={
-                  <Checkout
-                    cartItems={cartItems}
-                    clearCart={clearCart}
-                  />
-                }
-              />
-
+              <Route path="/" element={<Home addToCart={handleAddToCart} />} />
+              <Route path="/product/:id" element={<ProductDetails addToCart={handleAddToCart} />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/success" element={<Success />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/orders" element={<Orders />} />
               <Route path="/wishlist" element={<Wishlist addToCart={addToCart} />} />
             </Routes>
           </main>
