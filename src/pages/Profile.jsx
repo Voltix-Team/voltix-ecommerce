@@ -4,21 +4,8 @@ import { UserContext } from './UserContext';
 import OrderCard from '../components/UI/OrderCard';
 import { useSelector } from 'react-redux';
 import { selectAllOrders } from '../redux/orderSlice';
-
-const Field = ({ label, value, onChange, placeholder = '', type = 'text', error }) => (
-    <div>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{label}</p>
-        <input
-            type={type}
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            placeholder={placeholder}
-            className={`w-full border rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-300 outline-none transition-all
-                ${error ? 'border-red-300 bg-red-50 focus:border-red-400' : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-50'}`}
-        />
-        {error && <p className="text-[11px] text-red-500 mt-1">{error}</p>}
-    </div>
-);
+import Button from '../components/UI/Button';
+import Field from '../components/UI/Field';
 
 const ProfilePage = () => {
     const { user, logout, loading, updateUser } = useContext(UserContext);
@@ -108,7 +95,7 @@ const ProfilePage = () => {
             )}
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-6">
                 <div className="flex items-center gap-6">
                     <div className="w-24 h-24 bg-white border-2 border-blue-600 rounded-xl overflow-hidden flex items-center justify-center">
                         {user.avatar ? (
@@ -126,12 +113,12 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="flex gap-4 w-full md:w-auto">
-                    <button onClick={logout} className="flex-1 md:flex-none px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-lg transition-colors text-sm">
+                    <Button onClick={logout} >
                         Logout
-                    </button>
-                    <button onClick={openModal} className="flex-1 md:flex-none px-6 py-2.5 bg-[#0066FF] hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-sm">
+                    </Button>
+                    <Button onClick={openModal}>
                         Update Profile
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -161,9 +148,6 @@ const ProfilePage = () => {
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
                     <div className="flex justify-between items-center mb-8">
                         <h2 className="text-xl font-bold text-gray-900">Shipping Address</h2>
-                        <button onClick={openModal} className="px-4 py-1.5 border border-gray-200 text-[#0066FF] text-xs font-bold uppercase tracking-wider rounded-md hover:bg-gray-50">
-                            Manage
-                        </button>
                     </div>
                     <div className="flex items-start gap-3">
                         <MapPin className="text-[#0066FF] mt-0.5" size={20} />
@@ -237,10 +221,10 @@ const ProfilePage = () => {
                         </div>
 
                         <div className="px-8 py-5 border-t flex gap-3">
-                            <button onClick={() => setModalOpen(false)} className="flex-1 py-2.5 rounded-xl border border-gray-200 font-semibold text-gray-600 hover:bg-gray-50">Cancel</button>
-                            <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold disabled:opacity-60">
+                            <Button onClick={() => setModalOpen(false)} className="flex-1 py-2.5 ">Cancel</Button>
+                            <Button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 ">
                                 {saving ? 'Saving...' : 'Save Changes'}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, Trash2, ShoppingCart } from "lucide-react";
+import Button from "../components/UI/Button";
 
 const WISHLIST_KEY = "wishlist";
 
@@ -29,12 +30,11 @@ const Wishlist = ({ addToCart }) => {
                 <Heart className="mx-auto w-12 h-12 text-gray-300 mb-4" />
                 <h2 className="text-2xl font-semibold">Your wishlist is empty</h2>
                 <p className="text-gray-500 mt-2">Tap the heart on any product to save it here.</p>
-                <button
+                <Button
                     onClick={() => navigate("/")}
-                    className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md"
                 >
                     Browse Products
-                </button>
+                </Button>
             </div>
         );
     }
@@ -87,13 +87,13 @@ const Wishlist = ({ addToCart }) => {
                                         <span className="text-sm text-gray-400 line-through">${item.price}</span>
                                     )}
                                 </div>
-                                <button
+                                <Button
                                     onClick={() => handleAddToCart(item)}
-                                    className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-medium transition-colors flex items-center justify-center gap-2"
+                                    className="mt-5 w-full flex items-center justify-center gap-2"
                                 >
                                     <ShoppingCart size={18} />
                                     Add to Cart
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     );

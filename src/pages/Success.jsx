@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
+import Button from '../components/UI/Button';
 
 const Success = () => {
   const navigate = useNavigate();
@@ -49,15 +50,15 @@ const Success = () => {
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          <button
+          <Button
             onClick={() => navigate('/')}
-            className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors"
+            className="w-1/2"
           >
             Return to Home
-          </button>
+          </Button>
           <button
             onClick={() => alert('Order tracking coming soon!')}
-            className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-colors"
+            className="w-1/2"
           >
             Track Order
           </button>

@@ -1,15 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchProductById } from '../services/api';
 import StarRating from '../components/UI/StarRating';
 import ReviewSection from '../components/UI/ReviewSection';
+import Button from '../components/UI/Button';
+import { UserContext } from './UserContext';
+import { toast } from 'react-hot-toast';
+import { useProtectedAction } from '../hooks/useProtectedAction';
 
 const ProductDetails = ({ addToCart }) => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useContext(UserContext);
+    
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [mainImage, setMainImage] = useState('');
+
+    const protectedAction = useProtectedAction();
 
     useEffect(() => {
         fetchProductById(id).then(data => {
@@ -26,15 +34,22 @@ const ProductDetails = ({ addToCart }) => {
         ? Math.round(product.price * (1 - product.discountPercentage / 100))
         : product.price;
 
+    const handleAddToCart = () => {
+        protectedAction(() => {
+            addToCart(product);
+            toast.success(`${product.title} added to cart!`);
+        }, "You must login first to add items to cart");
+    };
+
     return (
         <div className="bg-gray-50 min-h-screen pb-20">
             <div className="max-w-6xl mx-auto px-6 py-12">
-                <button
+                <Button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8"
+                    className="flex items-center gap-2 mb-4"
                 >
                     ← Back to Shop
-                </button>
+                </Button>
 
                 <div className="grid md:grid-cols-2 gap-12">
                     {/* images */}
@@ -90,12 +105,12 @@ const ProductDetails = ({ addToCart }) => {
                             In Stock ({product.stock} available)
                         </div>
 
-                        <button
-                            onClick={() => addToCart(product)}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl text-xl font-semibold transition"
+                        <Button
+                            onClick={handleAddToCart}
+                            className="w-full"
                         >
                             Add to Cart
-                        </button>
+                        </Button>
 
                         {/* specifications */}
                         <div className="bg-white p-8 rounded-3xl">
@@ -109,7 +124,7 @@ const ProductDetails = ({ addToCart }) => {
                     </div>
                 </div>
 
-                {/* ✅ reviews section — full width below the two columns */}
+                {/* reviews section */}
                 <div className="mt-12">
                     <ReviewSection
                         productId={product.id}
