@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, selectCartCount } from './redux/cartSlice';
 
 
-import Navbar from './components/Layout/Navbar';
+import Navbar from './components/Layout/Navbar/Navbar';
 import Footer from './components/Layout/Footer';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -18,6 +18,7 @@ import ProfilePage from './pages/Profile';
 import Wishlist from './pages/Wishlist';
 import Orders from './pages/Orders'; 
 import { UserProvider } from './pages/UserContext';
+import { Toaster } from 'react-hot-toast';
 
 const ORDERS_KEY = 'voltix_orders';
 
@@ -80,6 +81,7 @@ function App() {
           )}
         </div>
       </div>
+      <Toaster position="top-center" richColors />
     </Router>
   );
 }

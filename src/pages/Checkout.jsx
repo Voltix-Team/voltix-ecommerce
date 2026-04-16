@@ -411,7 +411,7 @@ const Checkout = () => {
                 </form>
             </main>
 
-            {/* footer — unchanged */}
+            {/* footer */}
             <footer className="border-t border-gray-100 py-5">
                 <div className="w-full px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
                     <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest">

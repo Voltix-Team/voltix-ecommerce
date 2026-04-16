@@ -2,6 +2,7 @@ import { ShoppingBag, Trash2, ShieldCheck, Minus, Truck, Plus } from 'lucide-rea
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateQuantity, removeFromCart, clearCart, selectCartItems, selectCartTotal } from '../redux/cartSlice';
+import Button from '../components/UI/Button';
 
 const Cart = () => {
     const navigate = useNavigate();
@@ -104,12 +105,12 @@ const Cart = () => {
                                 <p className="text-slate-500 mb-8 max-w-md">
                                     Looks like you haven't added any precision components to your cart yet.
                                 </p>
-                                <button 
+                                <Button 
                                     onClick={() => navigate('/')} 
-                                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-md transition-colors text-sm tracking-wide"
+                                    className="w-50"
                                 >
                                     CONTINUE SHOPPING
-                                </button>
+                                </Button>
                             </div>
                         )}
                     </div>

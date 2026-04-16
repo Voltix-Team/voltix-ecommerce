@@ -25,7 +25,7 @@ const saveCartToStorage = (cart) => {
 
 const cartSlice = createSlice ({
     name : 'cart',
-    //how the cart will look like initially when the app first loads, empty
+    //how the cart will look like initially when the app first loads
     initialState : {
         items : loadCartFromStorage(),   // ← Now loads from localStorage
     },

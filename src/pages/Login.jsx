@@ -17,15 +17,18 @@ const Login = () => {
     };
 
     const handleLogin = async (e) => {
-        e.preventDefault();
-        setError("");
-        try {
-            await signInWithEmailAndPassword(auth, formData.email, formData.password);
-            navigate("/"); 
-        } catch (err) {
-            setError("Invalid credentials.");
-        }
-    };
+    e.preventDefault();
+    setError("");
+    
+    try {
+        await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        console.log("Login successful!");   // For debugging
+        navigate("/"); 
+    } catch (err) {
+        console.error(err);
+        setError("Invalid email or password.");
+    }
+};
 
     return (
         <div className="flex-1 flex items-center justify-center overflow-hidden">
@@ -43,7 +46,12 @@ const Login = () => {
                     <Input label="PASSWORD" name="password" type="password" placeholder="••••••••" onChange={handleChange} />
                     <button type="button" className="absolute right-0 top-0 text-[8px] font-bold text-blue-600 uppercase">Forgot?</button>
                 </div>
-                <Button className="w-full py-2.5 mt-2 text-xs font-bold">Log In</Button>
+                <Button 
+                    type="submit" 
+                    className="w-full py-2.5 mt-2 text-xs font-bold"
+                >
+                    Log In
+                </Button>
             </form>
 
             <div className="relative my-6 text-center">

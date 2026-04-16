@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package } from 'lucide-react';
 import OrderCard from '../components/UI/OrderCard';
+import Button from '../components/UI/Button';
 
 const ORDERS_KEY = 'voltix_orders';
 
@@ -9,18 +10,9 @@ const Orders = () => {
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
 
-    const loadOrders = () => {
-        try {
-            const saved = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
-            setOrders(saved.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-        } catch (err) {
-            console.error(err);
-            setOrders([]);
-        }
-    };
-
     useEffect(() => {
-        loadOrders();
+        const saved = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+        setOrders(saved);
     }, []);
 
     return (
@@ -36,11 +28,12 @@ const Orders = () => {
 
             {orders.length > 0 ? (
                 <div className="space-y-4">
-                    {orders.map((order) => (
-                        <OrderCard key={order.id} order={order} />
+                    {orders.map((order, i) => (
+                        <OrderCard key={order.id ?? i} order={order} />
                     ))}
                 </div>
             ) : (
+                /* empty state */
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
                         <Package className="w-10 h-10 text-gray-300" />
@@ -49,12 +42,11 @@ const Orders = () => {
                     <p className="text-gray-500 mb-8 max-w-sm">
                         Looks like you haven't placed any orders. Start shopping and your orders will appear here.
                     </p>
-                    <button
+                    <Button
                         onClick={() => navigate('/')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-xl transition-colors text-sm"
                     >
                         Start Shopping
-                    </button>
+                    </Button>
                 </div>
             )}
         </div>

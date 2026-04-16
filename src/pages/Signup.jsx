@@ -27,10 +27,13 @@ const Signup = () => {
         if (formData.password !== formData.confirmPassword) {
             return setError("Passwords do not match");
         }
+    
         try {
             await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-            navigate("/Home"); 
+            console.log("Signup successful!");
+            navigate("/"); 
         } catch (error) {
+            console.error(error);
             setError(error.message);
         }
     };
@@ -39,7 +42,7 @@ const Signup = () => {
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
-            navigate("/Home");
+            navigate("/");
         } catch (err) {
             setError(err.message);
         }

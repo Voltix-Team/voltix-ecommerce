@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/UI/Card';
 import { fetchProducts } from '../services/api';
+import Button from '../components/UI/Button';
 
 const Home = ({ addToCart }) => {
     const [products, setProducts] = useState([]);
@@ -58,18 +59,18 @@ const Home = ({ addToCart }) => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* hero section */}
-            <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white py-24">
+            <div className="bg-slate-800 text-white py-24">
                 <div className="max-w-6xl mx-auto px-6 text-center">
-                    <h1 className="text-6xl font-bold mb-6">Unleash Power</h1>
-                    <p className="text-2xl max-w-2xl mx-auto opacity-90">
+                    <h1 className="text-6xl font-bold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">Unleash Power</h1>
+                    <p className="text-xl max-w-2xl mx-auto text-slate-400 font-medium mb-3">
                         Experience the next generation of premium electronics
                     </p>
-                    <button
+                    <Button
                         onClick={() => document.getElementById('products').scrollIntoView({ behavior: 'smooth' })}
-                        className="mt-10 bg-white text-blue-600 px-10 py-4 rounded-2xl font-semibold text-lg hover:bg-gray-100 transition"
+                        className="px-24 py-4"
                     >
                         Shop Now
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -81,9 +82,9 @@ const Home = ({ addToCart }) => {
                         <button
                             key={cat}
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-6 py-3 rounded-3xl font-medium transition-all ${
+                            className={`px-6 py-3 rounded-2xl font-medium transition-all ${
                                 activeCategory === cat
-                                    ? 'bg-blue-600 text-white shadow'
+                                    ? 'bg-blue-700 text-white shadow'
                                     : 'bg-white border border-gray-200 hover:bg-gray-50'
                             }`}
                         >

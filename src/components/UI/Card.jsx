@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import StarRating from "./StarRating";
+import Button from "./Button";
+import { toast } from 'react-hot-toast';
+import { useProtectedAction } from "../../hooks/useProtectedAction";
 
 const WISHLIST_KEY = "wishlist";
 
@@ -18,15 +21,31 @@ const ProductCard = ({ product, addToCart }) => {
         getWishlist().some((item) => item.id === product.id)
     );
 
+    const protectedAction = useProtectedAction();
+
     const toggleFavorite = (e) => {
         e.preventDefault();
-        const wishlist = getWishlist();
-        const exists = wishlist.some((item) => item.id === product.id);
-        const updated = exists
-            ? wishlist.filter((item) => item.id !== product.id)
-            : [...wishlist, product];
-        localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
-        setIsFavorite(!exists);
+        protectedAction(() => {
+            const wishlist = getWishlist();
+            const exists = wishlist.some((item) => item.id === product.id);
+            const updated = exists
+                ? wishlist.filter((item) => item.id !== product.id)
+                : [...wishlist, product];
+
+            localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
+            setIsFavorite(!exists);
+
+            toast.success(exists ? "Removed from wishlist" : "Added to wishlist");
+        }, "You must login first to use wishlist");
+    };
+
+    const handleAddToCart = (e) => {
+        e.preventDefault();
+
+        protectedAction(() => {
+            addToCart(product);
+            toast.success(`${product.title} added to cart1`);
+        }, "You must login first to add items to cart");
     };
 
     const discountedPrice = product.discountPercentage
@@ -83,15 +102,12 @@ const ProductCard = ({ product, addToCart }) => {
                         </span>
                     )}
                 </div>
-                <button
-                    onClick={(e) => {
-                        e.preventDefault();
-                        addToCart(product);
-                    }}
+                <Button
+                    onClick={handleAddToCart}
                     className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-2xl font-medium transition-colors"
                 >
                     Add to Cart
-                </button>
+                </Button>
             </div>
         </div>
     );
