@@ -1,23 +1,13 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { Heart, Trash2, ShoppingCart } from "lucide-react";
-
-const WISHLIST_KEY = "wishlist";
+import Button from "../components/UI/Button";
+import { selectWishlistItems, removeFromWishlist } from "../redux/wishlistSlice";
 
 const Wishlist = ({ addToCart }) => {
     const navigate = useNavigate();
-    const [items, setItems] = useState([]);
-
-    useEffect(() => {
-        const stored = JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
-        setItems(stored);
-    }, []);
-
-    const removeFromWishlist = (id) => {
-        const updated = items.filter((item) => item.id !== id);
-        setItems(updated);
-        localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
-    };
+    const dispatch = useDispatch();
+    const items = useSelector(selectWishlistItems);
 
     const handleAddToCart = (item) => {
         if (addToCart) addToCart(item);
@@ -29,12 +19,11 @@ const Wishlist = ({ addToCart }) => {
                 <Heart className="mx-auto w-12 h-12 text-gray-300 mb-4" />
                 <h2 className="text-2xl font-semibold">Your wishlist is empty</h2>
                 <p className="text-gray-500 mt-2">Tap the heart on any product to save it here.</p>
-                <button
+                <Button
                     onClick={() => navigate("/")}
-                    className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md"
                 >
                     Browse Products
-                </button>
+                </Button>
             </div>
         );
     }
@@ -67,7 +56,7 @@ const Wishlist = ({ addToCart }) => {
                                     type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        removeFromWishlist(item.id);
+                                        dispatch(removeFromWishlist(item.id));
                                     }}
                                     aria-label="Remove from wishlist"
                                     className="absolute top-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full shadow-sm transition-colors"
@@ -87,13 +76,13 @@ const Wishlist = ({ addToCart }) => {
                                         <span className="text-sm text-gray-400 line-through">${item.price}</span>
                                     )}
                                 </div>
-                                <button
+                                <Button
                                     onClick={() => handleAddToCart(item)}
-                                    className="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-medium transition-colors flex items-center justify-center gap-2"
+                                    className="mt-5 w-full flex items-center justify-center gap-2"
                                 >
                                     <ShoppingCart size={18} />
                                     Add to Cart
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     );

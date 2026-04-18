@@ -1,6 +1,11 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, ChevronDown, ShieldCheck, CreditCard, Banknote } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearCart, selectCartItems, selectCartTotal } from '../redux/cartSlice';
+// Added:
+import { UserContext } from './UserContext'; 
+import { addOrder } from '../redux/orderSlice';
 
 const cities = [
     'Amman', 'Zarqa', 'Irbid', 'Aqaba', 'Mafraq', "Ma'an",
@@ -24,18 +29,15 @@ const TextInput = ({ error, className = '', ...props }) => (
 const FieldErr = ({ msg }) =>
     msg ? <p className="text-[11px] text-red-500 mt-1">{msg}</p> : null;
 
-//  card number formatter: adds space every 4 digits 
 const formatCardNumber = (value) =>
     value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
 
-//  expiry formatter: MM/YY 
 const formatExpiry = (value) => {
     const digits = value.replace(/\D/g, '').slice(0, 4);
     if (digits.length >= 3) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
     return digits;
 };
 
-//  detect card brand from first digit
 const detectBrand = (number) => {
     const n = number.replace(/\s/g, '');
     if (/^4/.test(n)) return 'Visa';
@@ -44,18 +46,21 @@ const detectBrand = (number) => {
     return null;
 };
 
-const Checkout = ({ cartItems = [], clearCart }) => {
-    const navigate = useNavigate();
+const Checkout = () => {
+    const navigate  = useNavigate();
+    const dispatch  = useDispatch();
+    const { user } = useContext(UserContext); // Added line
+    const cartItems = useSelector(selectCartItems);
+    const subtotal  = useSelector(selectCartTotal);
+    const total     = subtotal;
 
-    // contact + shipping form
     const [form, setForm] = useState({
         email: '', phone: '',
         fullName: '', street: '',
         city: 'Amman', postalCode: '',
     });
 
-    // payment
-    const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' | 'cash'
+    const [paymentMethod, setPaymentMethod] = useState('card');
     const [card, setCard] = useState({
         number: '', name: '', expiry: '', cvv: ''
     });
@@ -73,31 +78,20 @@ const Checkout = ({ cartItems = [], clearCart }) => {
         setErrors(p => ({ ...p, [`card_${field}`]: '' }));
     };
 
-    const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
-    const total    = subtotal;
-
-    //  validation 
     const validate = () => {
         const e = {};
-
-        // contact
         if (!form.email.trim()) e.email = 'Email is required';
         else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Enter a valid email address';
         if (!form.phone.trim()) e.phone = 'Phone number is required';
         else if (!/^\+?[\d\s\-()]{7,15}$/.test(form.phone)) e.phone = 'Enter a valid phone number';
-
-        // shipping
         if (!form.fullName.trim()) e.fullName = 'Full name is required';
         if (!form.street.trim()) e.street = 'Street address is required';
 
-        // card fields (only if card payment selected)
         if (paymentMethod === 'card') {
             const rawNumber = card.number.replace(/\s/g, '');
             if (!rawNumber) e.card_number = 'Card number is required';
             else if (rawNumber.length < 16) e.card_number = 'Card number must be 16 digits';
-
             if (!card.name.trim()) e.card_name = 'Cardholder name is required';
-
             if (!card.expiry) e.card_expiry = 'Expiry date is required';
             else {
                 const [mm, yy] = card.expiry.split('/');
@@ -108,11 +102,9 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                 else if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1))
                     e.card_expiry = 'Card has expired';
             }
-
             if (!card.cvv) e.card_cvv = 'CVV is required';
             else if (!/^\d{3,4}$/.test(card.cvv)) e.card_cvv = 'CVV must be 3 or 4 digits';
         }
-
         return e;
     };
 
@@ -122,9 +114,28 @@ const Checkout = ({ cartItems = [], clearCart }) => {
         if (Object.keys(errs).length) { setErrors(errs); return; }
         setErrors({});
         setLoading(true);
+        
+        // Simulating API call
         await new Promise(r => setTimeout(r, 1400));
         setLoading(false);
-        if (clearCart) clearCart();
+
+        // Updated Logic to save to Redux/History
+        const orderData = {
+            userEmail: user?.email, 
+            items: cartItems,
+            subtotal,
+            total,
+            paymentMethod,
+            shipping: {
+                fullName: form.fullName,
+                street: form.street,
+                city: form.city,
+                postalCode: form.postalCode,
+            },
+        };
+
+        dispatch(addOrder(orderData));
+        dispatch(clearCart());
         navigate('/success');
     };
 
@@ -132,8 +143,16 @@ const Checkout = ({ cartItems = [], clearCart }) => {
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
+            <header className="border-b border-gray-100">
+                <div className="w-full px-6 h-14 flex items-center justify-between">
+                    <Link to="/" className="font-bold text-gray-900 text-lg tracking-tight">Voltix</Link>
+                    <span className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+                        <ShieldCheck size={13} className="text-gray-400" />
+                        Secure Checkout
+                    </span>
+                </div>
+            </header>
 
-            {/* breadcrumb  */}
             <div className="max-w-xl mx-auto px-6 pt-7 pb-5 w-full">
                 <div className="flex items-center gap-2 text-[11px] font-semibold tracking-widest uppercase">
                     <span className="text-blue-600">Information</span>
@@ -144,7 +163,6 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                 </div>
             </div>
 
-            {/* cart summary  */}
             {cartItems.length > 0 && (
                 <div className="max-w-xl mx-auto px-6 w-full mb-2">
                     <div className="bg-gray-50 border border-gray-200 rounded-xl px-6 py-4 space-y-2">
@@ -177,7 +195,6 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                     noValidate
                     className="w-full max-w-xl bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm"
                 >
-                    {/* Step 01 — Contact */}
                     <div className="px-8 pt-8 pb-7 border-b border-gray-100">
                         <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.18em] mb-1">Step 01</p>
                         <h2 className="text-[22px] font-bold text-gray-900 mb-6 tracking-tight">Contact Information</h2>
@@ -195,7 +212,6 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                         </div>
                     </div>
 
-                    {/* Step 02 — Shipping */}
                     <div className="px-8 pt-7 pb-8 border-b border-gray-100">
                         <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.18em] mb-1">Step 02</p>
                         <h2 className="text-[22px] font-bold text-gray-900 mb-6 tracking-tight">Shipping Address</h2>
@@ -234,12 +250,10 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                         </div>
                     </div>
 
-                    {/* Step 03 — Payment */}
                     <div className="px-8 pt-7 pb-8 border-b border-gray-100">
                         <p className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.18em] mb-1">Step 03</p>
                         <h2 className="text-[22px] font-bold text-gray-900 mb-6 tracking-tight">Payment</h2>
 
-                        {/* method selector */}
                         <div className="grid grid-cols-2 gap-3 mb-6">
                             <button
                                 type="button"
@@ -276,10 +290,8 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                             </button>
                         </div>
 
-                        {/* card form — only shown when card is selected */}
                         {paymentMethod === 'card' && (
                             <div className="space-y-4">
-                                {/* card number */}
                                 <div>
                                     <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5 block">
                                         Card Number
@@ -292,7 +304,6 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                                             error={errors.card_number}
                                             inputMode="numeric"
                                         />
-                                        {/* brand badge */}
                                         {brand && (
                                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
                                                 {brand}
@@ -302,7 +313,6 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                                     <FieldErr msg={errors.card_number} />
                                 </div>
 
-                                {/* cardholder name */}
                                 <div>
                                     <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5 block">
                                         Cardholder Name
@@ -316,7 +326,6 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                                     <FieldErr msg={errors.card_name} />
                                 </div>
 
-                                {/* expiry + cvv */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-1.5 block">
@@ -349,7 +358,6 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                                     </div>
                                 </div>
 
-                                {/* security note */}
                                 <div className="flex items-center gap-2 text-[11px] text-gray-400 mt-1">
                                     <Lock size={11} />
                                     <span>Your card details are encrypted and never stored</span>
@@ -357,7 +365,6 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                             </div>
                         )}
 
-                        {/* cash on delivery note */}
                         {paymentMethod === 'cash' && (
                             <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 text-sm text-amber-800">
                                 <p className="font-semibold mb-1">Cash on Delivery selected</p>
@@ -368,14 +375,13 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                         )}
                     </div>
 
-                    {/*  Total and submit  */}
                     <div className="px-8 py-6">
                         <div className="flex items-end justify-between mb-1">
                             <div>
                                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-0.5">Total Amount</p>
                                 <p className="text-[28px] font-bold text-gray-900 leading-none">{fmt(total)}</p>
                             </div>
-                            <p className="text-[11px] text-gray-400 pb-1">Inc. VAT &amp; Shipping</p>
+                            <p className="text-[11px] text-gray-400 pb-1">Inc. VAT & Shipping</p>
                         </div>
 
                         <button
@@ -404,6 +410,22 @@ const Checkout = ({ cartItems = [], clearCart }) => {
                     </div>
                 </form>
             </main>
+
+            {/* footer */}
+            <footer className="border-t border-gray-100 py-5">
+                <div className="w-full px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest">
+                        © 2026 Voltix. Engineered for the Future.
+                    </p>
+                    <div className="flex items-center gap-4 text-[10px] text-gray-400 font-semibold uppercase tracking-widest">
+                        <span>Official Distributor Jordan</span>
+                        <span className="text-gray-200">·</span>
+                        <span>SSL Encrypted</span>
+                        <span className="text-gray-200">·</span>
+                        <Link to="/support" className="hover:text-gray-600 transition-colors">24/7 Support</Link>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 };
