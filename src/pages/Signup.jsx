@@ -6,6 +6,8 @@ import Button from "../components/UI/Button";
 import Input from "../components/UI/Input";
 import energyBg from '../assets/left-side-image.png';
 import Home from '../pages/Home';
+import { FcGoogle } from 'react-icons/fc';       
+import { FaApple } from 'react-icons/fa';
 
 
 const Signup = () => {
@@ -95,12 +97,21 @@ const Signup = () => {
                 </div>
 
                 <div className="flex gap-2">
-                    <button onClick={handleGoogleSignup} type="button" className="flex-1 flex items-center justify-center gap-2 border border-slate-200 py-1.5 rounded-lg text-[9px] font-bold text-slate-600">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" className="w-3 h-3" /> GOOGLE
-                    </button>
-                    <button type="button" className="flex-1 flex items-center justify-center gap-2 border border-slate-200 py-1.5 rounded-lg text-[9px] font-bold text-slate-600">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="A" className="w-3 h-3" /> APPLE
-                    </button>
+                    <Button
+                        type="button"
+                        variant="plain"
+                        onClick={handleGoogleSignup}
+                        className="flex-1 flex items-center justify-center gap-2 border border-slate-200 py-1.5 rounded-lg 
+                                text-[9px] font-bold text-slate-600 hover:bg-slate-50 transition">
+                        <FcGoogle className="w-4 h-4" />GOOGLE
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="plain"
+                        className="flex-1 flex items-center justify-center gap-2 border border-slate-200 py-1.5 rounded-lg 
+                                    text-[9px] font-bold text-slate-600 hover:bg-slate-50 transition">
+                        <FaApple className="w-4 h-4" />APPLE
+                    </Button>
                 </div>
                 
                 <footer className="mt-4 text-center">

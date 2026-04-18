@@ -53,18 +53,15 @@ const Wishlist = ({ addToCart }) => {
                                     alt={item.title || item.name}
                                     className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
                                 />
-                                <button
-                                    type="button"
+                                <Button
+                                    variant="favorite"
+                                    className="absolute top-4 right-4"
+                                    aria-label="Remove from wishlist"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        // Step E — Writing state (dispatching):
-                                        dispatch(removeFromWishlist(item.id));
-                                    }}
-                                    aria-label="Remove from wishlist"
-                                    className="absolute top-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full shadow-sm transition-colors"
-                                >
-                                    <Trash2 className="w-5 h-5 text-red-500" />
-                                </button>
+                                        dispatch(removeFromWishlist(item.id));}}>
+                                        <Trash2 className="w-5 h-5 text-red-500" />
+                                </Button>
                             </div>
 
                             <div className="p-5">

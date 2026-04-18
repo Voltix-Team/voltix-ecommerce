@@ -128,9 +128,12 @@ const ProfilePage = () => {
                 <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
                     <div className="flex justify-between items-center mb-8">
                         <h2 className="text-xl font-bold text-gray-900">Personal Information</h2>
-                        <button onClick={openModal} className="text-[#0066FF] hover:text-blue-800">
-                            <Edit size={20} strokeWidth={2.5} />
-                        </button>
+                        <Button 
+                            variant="icon" 
+                            onClick={openModal} 
+                            className="text-[#0066FF] hover:text-blue-800">
+                                <Edit size={20} strokeWidth={2.5} />
+                        </Button>
                     </div>
                     <div className="space-y-6">
                         <div><p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</p><p className="font-medium">{user.name}</p></div>
@@ -138,7 +141,12 @@ const ProfilePage = () => {
                         <div>
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Phone Number</p>
                             {user.phone ? <p className="font-medium">{user.phone}</p> : (
-                                <button onClick={openModal} className="text-blue-600 text-sm font-semibold hover:underline">Add phone number</button>
+                                <Button 
+                                    variant="plain" 
+                                    onClick={openModal} 
+                                    className="text-blue-600 text-sm font-semibold hover:underline">
+                                        Add phone number
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -153,7 +161,12 @@ const ProfilePage = () => {
                         <MapPin className="text-[#0066FF] mt-0.5" size={20} />
                         <div className="text-gray-700 font-medium leading-relaxed">
                             {addressParts.length > 0 ? addressParts.map((line, i) => <p key={i}>{line}</p>) : (
-                                <button onClick={openModal} className="text-blue-600 text-sm font-semibold hover:underline">Add shipping address</button>
+                                <Button 
+                                    variant="plain" 
+                                    onClick={openModal} 
+                                    className="text-blue-600 text-sm font-semibold hover:underline">
+                                        Add shipping address
+                                </Button>
                             )}
                         </div>
                     </div>
@@ -185,7 +198,9 @@ const ProfilePage = () => {
                                 <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Account</p>
                                 <h3 className="text-xl font-bold">Update Profile</h3>
                             </div>
-                            <button onClick={() => setModalOpen(false)}><X size={20} className="text-gray-400 hover:text-gray-600" /></button>
+                            <Button variant="icon" onClick={() => setModalOpen(false)}>
+                                <X size={20} className="text-gray-400 hover:text-gray-600" />
+                            </Button>                        
                         </div>
 
                         <div className="px-8 py-6 space-y-6 max-h-[65vh] overflow-y-auto">

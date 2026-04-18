@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, Package, Calendar } from 'lucide-react';
 import OrderItemRow from './OrderItemRow';
+import Button from './Button';
 
 const OrderCard = ({ order }) => {
   const [expanded, setExpanded] = useState(false);
@@ -16,9 +17,12 @@ const OrderCard = ({ order }) => {
   return (
     <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
       {/* header (always visible) */}
-      <button
+      <Button
+        variant="plain"
         onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center justify-between px-6 py-5 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-between px-6 py-5 hover:bg-gray-50 transition-colors text-left"
+        aria-expanded={expanded}
+        aria-label={`Toggle order ${order.id}`}
       >
         <div className="flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
@@ -36,20 +40,14 @@ const OrderCard = ({ order }) => {
         <div className="flex items-center gap-5">
           <div className="text-right hidden sm:block">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-              {itemCount} {itemCount === 1 ? 'item' : 'items'}
-            </p>
+              {itemCount} {itemCount === 1 ? 'item' : 'items'}</p>
             <p className="text-base font-bold text-gray-900 mt-0.5">
-              ${order.total.toFixed(2)}
-            </p>
+              ${order.total.toFixed(2)}</p>
           </div>
-          <ChevronDown
-            size={18}
-            className={`text-gray-400 transition-transform duration-200 ${
-              expanded ? 'rotate-180' : ''
-            }`}
-          />
-        </div>
-      </button>
+          <ChevronDown size={18} className={`text-gray-400 transition-transform duration-200 ${
+            expanded ? 'rotate-180' : ''}`}/>
+          </div>
+      </Button>
 
       {/* expanded body */}
       {expanded && (

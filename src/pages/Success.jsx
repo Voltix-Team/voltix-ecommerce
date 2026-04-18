@@ -56,12 +56,12 @@ const Success = () => {
           >
             Return to Home
           </Button>
-          <button
+          <Button
             onClick={() => alert('Order tracking coming soon!')}
             className="w-1/2"
           >
             Track Order
-          </button>
+          </Button>
         </div>
 
       </div>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import logo from '../../../assets/Logo.png';
 import { HelpCircle } from 'lucide-react';
+import Button from '../../UI/Button';
 
 const AuthNavbar = () => {
     return (
@@ -10,9 +11,14 @@ const AuthNavbar = () => {
             </Link>
             <div className="flex items-center gap-2 text-sm text-gray-500">
                 <span>Power Your Future</span>
-                <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                <Button
+                    variant="icon"
+                    className="text-gray-400 hover:text-gray-600 hover:bg-transparent"
+                    title="Help"         
+                    aria-label="Help"
+                >
                     <HelpCircle size={18} />
-                </button>
+                </Button>
             </div>
         </header>
     );
