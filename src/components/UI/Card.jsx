@@ -9,6 +9,7 @@ import { toggleWishlist, selectIsInWishlist } from "../../redux/wishlistSlice";
 
 const ProductCard = ({ product, addToCart }) => {
     const dispatch = useDispatch();
+    //Step F — Derived data: 
     const isFavorite = useSelector(selectIsInWishlist(product.id));
 
     const protectedAction = useProtectedAction();

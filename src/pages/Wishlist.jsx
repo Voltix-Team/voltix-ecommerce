@@ -6,6 +6,7 @@ import { selectWishlistItems, removeFromWishlist } from "../redux/wishlistSlice"
 
 const Wishlist = ({ addToCart }) => {
     const navigate = useNavigate();
+    // Step D — Reading state in a component:
     const dispatch = useDispatch();
     const items = useSelector(selectWishlistItems);
 
@@ -56,6 +57,7 @@ const Wishlist = ({ addToCart }) => {
                                     type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        // Step E — Writing state (dispatching):
                                         dispatch(removeFromWishlist(item.id));
                                     }}
                                     aria-label="Remove from wishlist"

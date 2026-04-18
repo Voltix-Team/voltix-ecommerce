@@ -31,12 +31,15 @@ const saveWishlistToStorage = (items) => {
     }
 };
 
+// STEP A :  creating a slice 
+// this single call gives you a reducer and a action creators 
 const wishlistSlice = createSlice({
     name: 'wishlist',
     initialState: {
         items: loadWishlistFromStorage(),
     },
     reducers: {
+        // these are the action creators -> functions thate build a action object for you 
         toggleWishlist: (state, action) => {
             const product = action.payload;
             const exists = state.items.some(item => item.id === product.id);

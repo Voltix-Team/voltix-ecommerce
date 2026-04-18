@@ -1,14 +1,20 @@
 import React from 'react'
 
-// 1. Pass 'props' as the single argument
-const Input = (props) => {
-
-    // 2. Destructure the variables from props 
-    const { label, type, placeholder, name, value, onChange } = props;
-
+const Input = ({
+    label,
+    value,
+    onChange,
+    placeholder = '',
+    type = 'text',
+    name,
+    error,
+}) => {
     return (
-        <div className="flex flex-col gap-1 mb-4">
-            <label htmlFor={name} className='text-sm font-semibold text-deepCharcoal'>
+        <div className="mb-5">
+            <label
+                htmlFor={name}
+                className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block"
+            >
                 {label}
             </label>
 
@@ -19,7 +25,15 @@ const Input = (props) => {
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className="w-full border-b border-gray-200 py-2 bg-transparent focus:outline-none focus:border-electricBlue transition-all" />
+                className={`w-full border rounded-lg px-3.5 py-2.5 text-sm
+                    text-gray-800 placeholder-gray-300 outline-none transition-all
+                    ${error
+                        ? 'border-red-300 bg-red-50 focus:border-red-400'
+                        : 'border-gray-200 bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-50'
+                    }`}
+            />
+
+            {error && <p className="text-[11px] text-red-500 mt-1">{error}</p>}
         </div>
     )
 }
