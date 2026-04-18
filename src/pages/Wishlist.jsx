@@ -1,24 +1,13 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { Heart, Trash2, ShoppingCart } from "lucide-react";
 import Button from "../components/UI/Button";
-
-const WISHLIST_KEY = "wishlist";
+import { selectWishlistItems, removeFromWishlist } from "../redux/wishlistSlice";
 
 const Wishlist = ({ addToCart }) => {
     const navigate = useNavigate();
-    const [items, setItems] = useState([]);
-
-    useEffect(() => {
-        const stored = JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
-        setItems(stored);
-    }, []);
-
-    const removeFromWishlist = (id) => {
-        const updated = items.filter((item) => item.id !== id);
-        setItems(updated);
-        localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
-    };
+    const dispatch = useDispatch();
+    const items = useSelector(selectWishlistItems);
 
     const handleAddToCart = (item) => {
         if (addToCart) addToCart(item);
@@ -67,7 +56,7 @@ const Wishlist = ({ addToCart }) => {
                                     type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        removeFromWishlist(item.id);
+                                        dispatch(removeFromWishlist(item.id));
                                     }}
                                     aria-label="Remove from wishlist"
                                     className="absolute top-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full shadow-sm transition-colors"

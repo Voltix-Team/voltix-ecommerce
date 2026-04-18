@@ -1,41 +1,23 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { Heart } from "lucide-react";
 import StarRating from "./StarRating";
 import Button from "./Button";
 import { toast } from 'react-hot-toast';
 import { useProtectedAction } from "../../hooks/useProtectedAction";
-
-const WISHLIST_KEY = "wishlist";
-
-const getWishlist = () => {
-    try {
-        return JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
-    } catch {
-        return [];
-    }
-};
+import { toggleWishlist, selectIsInWishlist } from "../../redux/wishlistSlice";
 
 const ProductCard = ({ product, addToCart }) => {
-    const [isFavorite, setIsFavorite] = useState(() =>
-        getWishlist().some((item) => item.id === product.id)
-    );
+    const dispatch = useDispatch();
+    const isFavorite = useSelector(selectIsInWishlist(product.id));
 
     const protectedAction = useProtectedAction();
 
     const toggleFavorite = (e) => {
         e.preventDefault();
         protectedAction(() => {
-            const wishlist = getWishlist();
-            const exists = wishlist.some((item) => item.id === product.id);
-            const updated = exists
-                ? wishlist.filter((item) => item.id !== product.id)
-                : [...wishlist, product];
-
-            localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
-            setIsFavorite(!exists);
-
-            toast.success(exists ? "Removed from wishlist" : "Added to wishlist");
+            dispatch(toggleWishlist(product));
+            toast.success(isFavorite ? "Removed from wishlist" : "Added to wishlist");
         }, "You must login first to use wishlist");
     };
 
