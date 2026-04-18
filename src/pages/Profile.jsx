@@ -5,7 +5,7 @@ import OrderCard from '../components/UI/OrderCard';
 import { useSelector } from 'react-redux';
 import { selectAllOrders } from '../redux/orderSlice';
 import Button from '../components/UI/Button';
-import Field from '../components/UI/Field';
+import Input from '../components/UI/Input';
 
 const ProfilePage = () => {
     const { user, logout, loading, updateUser } = useContext(UserContext);
@@ -195,8 +195,8 @@ const ProfilePage = () => {
                                     <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Personal</p>
                                 </div>
                                 <div className="space-y-4">
-                                    <Field label="Full Name" value={form.name} onChange={set('name')} error={errors.name} />
-                                    <Field label="Phone Number" value={form.phone} onChange={set('phone')} type="tel" placeholder="+962 79 000 0000" error={errors.phone} />
+                                    <Input label="Full Name" name="name" value={form.name} onChange={set('name')} error={errors.name} />
+                                    <Input label="Phone Number" name="phone" value={form.phone} onChange={set('phone')} type="tel" placeholder="+962 79 000 0000" error={errors.phone} />
                                 </div>
                             </div>
 
@@ -206,15 +206,15 @@ const ProfilePage = () => {
                                     <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Shipping Address</p>
                                 </div>
                                 <div className="space-y-4">
-                                    <Field label="Street Address" value={form.street} onChange={set('street')} placeholder="123 Main St" />
-                                    <Field label="Suite / Apt (optional)" value={form.suite} onChange={set('suite')} placeholder="Suite 400" />
+                                    <Input label="Street Address" name="street" value={form.street} onChange={set('street')} placeholder="123 Main St" />
+                                    <Input label="Suite / Apt (optional)" name="suite" value={form.suite} onChange={set('suite')} placeholder="Suite 400" />
                                     <div className="grid grid-cols-2 gap-3">
-                                        <Field label="City" value={form.city} onChange={set('city')} placeholder="Amman" />
-                                        <Field label="State / Region" value={form.state} onChange={set('state')} placeholder="Amman" />
+                                        <Input label="City" name="city" value={form.city} onChange={set('city')} placeholder="Amman" />
+                                        <Input label="State / Region" name="state" value={form.state} onChange={set('state')} placeholder="Amman" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <Field label="Postal Code" value={form.zip} onChange={set('zip')} placeholder="00000" />
-                                        <Field label="Country" value={form.country} onChange={set('country')} placeholder="Jordan" />
+                                        <Input label="Postal Code" name="zip" value={form.zip} onChange={set('zip')} placeholder="00000" />
+                                        <Input label="Country" name="country" value={form.country} onChange={set('country')} placeholder="Jordan" />
                                     </div>
                                 </div>
                             </div>

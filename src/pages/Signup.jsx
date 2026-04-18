@@ -86,7 +86,7 @@ const Signup = () => {
                         <input type="checkbox" required className="w-3 h-3 rounded text-blue-600" />
                         <p className="text-[9px] text-slate-500">I agree to the <span className="text-blue-600 font-bold">Terms & Privacy</span>.</p>
                     </div>
-                    <Button className="w-full py-2 text-xs font-bold">Create Account</Button>
+                    <Button type="submit" className="w-full py-2 text-xs font-bold">Create Account</Button>
                 </form>
 
                 <div className="relative my-4 text-center">
