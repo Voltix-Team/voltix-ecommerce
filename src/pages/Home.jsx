@@ -79,17 +79,16 @@ const Home = ({ addToCart }) => {
                 {/* category filters */}
                 <div className="flex flex-wrap gap-3 mb-10 justify-center">
                     {categories.map(cat => (
-                        <button
+                        <Button
                             key={cat}
+                            variant="category"
                             onClick={() => setActiveCategory(cat)}
-                            className={`px-6 py-3 rounded-2xl font-medium transition-all ${
+                            className={`${
                                 activeCategory === cat
-                                    ? 'bg-blue-700 text-white shadow'
-                                    : 'bg-white border border-gray-200 hover:bg-gray-50'
-                            }`}
-                        >
+                                ? 'bg-blue-700 text-white shadow'
+                                : 'bg-white border border-gray-200 hover:bg-gray-50'}`}>
                             {cat === 'all' ? 'All Products' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-                        </button>
+                        </Button>
                     ))}
                 </div>
 

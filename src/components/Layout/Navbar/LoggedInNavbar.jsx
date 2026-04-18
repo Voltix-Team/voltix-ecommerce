@@ -4,6 +4,7 @@ import logo from '../../../assets/Logo.png';
 import { useState } from 'react';
 import { signOut } from "firebase/auth";
 import { auth } from "../../../firebase/firebaseConfig";
+import Button from '../../UI/Button';
 
 const LoggedInNavbar = ({ cartCount = 0, searchTerm, setSearchTerm, handleSearch }) => {
     const navigate = useNavigate();
@@ -51,27 +52,29 @@ const LoggedInNavbar = ({ cartCount = 0, searchTerm, setSearchTerm, handleSearch
                                 </span>
                             )}
                         </Link>
-                        <button
+                        <Button
+                            variant="ghost"                     
                             onClick={() => navigate('/Profile')}
-                            className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-150"
                         >
                             <User size={22} />
                             <span className="hidden lg:block text-sm font-medium">My Account</span>
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="danger"                  
                             onClick={() => signOut(auth).then(() => navigate('/login'))}
-                            className="text-gray-400 hover:text-red-500 transition-colors duration-150"
                             title="Log out"
+                            aria-label="Log out"
                         >
                             <LogOut size={20} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="icon"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="md:hidden text-gray-700 hover:text-blue-600 transition-colors"
+                            className="md:hidden"           
                             aria-label="Toggle menu"
                         >
                             {isMenuOpen ? <X size={26} /> : <Menu size={26} />}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

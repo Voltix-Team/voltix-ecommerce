@@ -8,8 +8,7 @@ import { useProtectedAction } from "../../hooks/useProtectedAction";
 import { toggleWishlist, selectIsInWishlist } from "../../redux/wishlistSlice";
 
 const ProductCard = ({ product, addToCart }) => {
-    const dispatch = useDispatch();
-    //Step F — Derived data: 
+    const dispatch = useDispatch(); 
     const isFavorite = useSelector(selectIsInWishlist(product.id));
 
     const protectedAction = useProtectedAction();
@@ -49,16 +48,17 @@ const ProductCard = ({ product, addToCart }) => {
                             - {Math.round(product.discountPercentage)}%
                         </div>
                     )}
-                    <button
+                    <Button
+                        variant="favorite"
                         type="button"
                         onClick={toggleFavorite}
                         aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                        className="absolute top-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full shadow-sm transition-colors"
+                        className="absolute top-4 right-4"
                     >
                         <Heart
                             className={`w-5 h-5 transition-colors ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-600"}`}
                         />
-                    </button>
+                    </Button>
                 </div>
             </Link>
 

@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Menu, X, Heart, Search } from 'lucide-react';
 import logo from '../../../assets/Logo.png';
 import { useState } from 'react';
+import Button from '../../UI/Button';
 
 const GuestNavbar = ({ cartCount = 0, searchTerm, setSearchTerm, handleSearch }) => {
     const navigate = useNavigate();
@@ -38,15 +39,15 @@ const GuestNavbar = ({ cartCount = 0, searchTerm, setSearchTerm, handleSearch })
 
                     {/* Right side — wishlist, cart, login, signup */}
                     <div className="flex items-center gap-5 flex-shrink-0">
-                        <Link
-                            to="/wishlist"
-                            className="text-gray-700 hover:text-red-500 transition-colors duration-150"
-                            title="Wishlist"
-                        >
-                            <Heart size={22} />
+                        <Link to="/wishlist" title="Wishlist">
+                            <Button variant="icon" className="text-gray-700 hover:text-red-500">
+                                <Heart size={22} />
+                            </Button>
                         </Link>
-                        <Link to="/cart" className="relative text-gray-700 hover:text-blue-600 transition-colors duration-150">
-                            <ShoppingCart size={22} />
+                        <Link to="/cart" className="relative">
+                            <Button variant="icon" className="text-gray-700 hover:text-blue-600">
+                                <ShoppingCart size={22} />
+                            </Button>
                             {cartCount > 0 && (
                                 <span className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full leading-none">
                                     {cartCount}
@@ -67,13 +68,14 @@ const GuestNavbar = ({ cartCount = 0, searchTerm, setSearchTerm, handleSearch })
                                 Sign Up
                             </Link>
                         </div>
-                        <button
+                        <Button
+                            variant="icon"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="md:hidden text-gray-700 hover:text-blue-600 transition-colors"
+                            className="md:hidden"
                             aria-label="Toggle menu"
                         >
                             {isMenuOpen ? <X size={26} /> : <Menu size={26} />}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FcGoogle } from 'react-icons/fc';        
+import { FaApple } from 'react-icons/fa';
 import { auth } from "../firebase/firebaseConfig";
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import Button from "../components/UI/Button";
@@ -44,7 +46,12 @@ const Login = () => {
                 <Input label="EMAIL" name="email" type="email" placeholder="name@company.com" onChange={handleChange} />
                 <div className="relative">
                     <Input label="PASSWORD" name="password" type="password" placeholder="••••••••" onChange={handleChange} />
-                    <button type="button" className="absolute right-0 top-0 text-[8px] font-bold text-blue-600 uppercase">Forgot?</button>
+                    <Button
+                        type="button"
+                        variant="textLink"
+                        className="absolute right-0 top-0">
+                            Forgot?
+                    </Button>
                 </div>
                 <Button 
                     type="submit" 
@@ -60,8 +67,12 @@ const Login = () => {
             </div>
 
             <div className="flex gap-2 mb-6">
-                <button type="button" className="flex-1 flex items-center justify-center gap-2 border border-slate-100 py-2 rounded-lg text-[9px] font-bold text-slate-500 uppercase">Google</button>
-                <button type="button" className="flex-1 flex items-center justify-center gap-2 border border-slate-100 py-2 rounded-lg text-[9px] font-bold text-slate-500 uppercase">Apple</button>
+                <Button type="button" variant="social">
+                    <FcGoogle className="w-4 h-4" /> Google
+                </Button>
+                <Button type="button" variant="social">
+                    <FaApple className="w-4 h-4" />Apple
+                </Button>
             </div>
 
             <footer className="text-center">

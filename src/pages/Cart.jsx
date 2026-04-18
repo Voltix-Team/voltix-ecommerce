@@ -26,12 +26,13 @@ const Cart = () => {
                         <p className="text-slate-500">Precision engineered components ready for dispatch.</p>
                     </div>
                     {cartItems.length > 0 && (
-                        <button
+                        <Button
+                            variant="plain"
                             onClick={() => dispatch(clearCart())}
                             className="text-red-500 hover:text-red-600 text-sm font-medium flex items-center gap-1"
                         >
                             <Trash2 size={16} /> Clear Cart
-                        </button>
+                        </Button>
                     )}
                 </div>
 
@@ -65,19 +66,21 @@ const Cart = () => {
 
                                             <div className="w-1/4 flex justify-center">
                                                 <div className="flex items-center space-x-4 bg-white px-3 py-1.5 rounded-md border border-slate-200">
-                                                    <button 
+                                                    <Button
+                                                        variant="plain"
                                                         onClick={() => dispatch(updateQuantity({ id: item.id, delta: -1 }))}
-                                                        className="text-slate-400 hover:text-slate-600"
+                                                        className="text-slate-400 hover:text-slate-600 p-1"
                                                     >
                                                         <Minus className="w-4 h-4" />
-                                                    </button>
+                                                    </Button>
                                                     <span className="font-medium text-sm w-4 text-center">{item.quantity}</span>
-                                                    <button 
+                                                    <Button
+                                                        variant="plain"
                                                         onClick={() => dispatch(updateQuantity({ id: item.id, delta: 1 }))}
-                                                        className="text-slate-400 hover:text-slate-600"
+                                                        className="text-slate-400 hover:text-slate-600 p-1"
                                                     >
                                                         <Plus className="w-4 h-4" />
-                                                    </button>
+                                                    </Button>
                                                 </div>
                                             </div>
 
@@ -85,12 +88,13 @@ const Cart = () => {
                                                 <span className="font-bold text-lg text-slate-900">
                                                     ${(item.price * item.quantity).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                                                 </span>
-                                                <button 
+                                                <Button
+                                                    variant="plain"
                                                     onClick={() => dispatch(removeFromCart(item.id))} 
-                                                    className="text-red-500 hover:text-red-700 transition-colors"
+                                                    className="text-red-500 hover:text-red-700 transition-colors p-1"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
                                     ))}
@@ -144,7 +148,7 @@ const Cart = () => {
                                 </div>
                             </div>
 
-                            <button
+                            <Button
                                 disabled={cartItems.length === 0}
                                 onClick={() => navigate('/checkout')}
                                 className={`w-full font-semibold py-4 rounded-md transition-colors mb-6 text-sm tracking-wide ${
@@ -154,7 +158,7 @@ const Cart = () => {
                                 }`}
                             >
                                 PROCEED TO CHECKOUT
-                            </button>
+                            </Button>
 
                             <div className="space-y-3">
                                 <div className="bg-white p-4 rounded-lg flex items-center space-x-3 text-sm border shadow-sm text-slate-600 border-slate-100">
