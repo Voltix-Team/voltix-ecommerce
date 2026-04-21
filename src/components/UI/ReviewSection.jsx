@@ -1,11 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
-import { UserContext } from '../../pages/UserContext';
+// import { UserContext } from '../../pages/UserContext';
+import { useSelector } from 'react-redux';
 import StarRating from './StarRating';
 import WriteReview from './WriteReview';
 import ReviewItem from './ReviewItem';
 
 const ReviewSection = ({ productId, apiReviews = [] }) => {
-    const { user } = useContext(UserContext);
+    const  user  = useSelector((state) => state.user);
     const STORAGE_KEY = `voltix_reviews_${productId}`;
 
     const [userReviews, setUserReviews] = useState(() => {

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Lock, ChevronDown, ShieldCheck, CreditCard, Banknote } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearCart, selectCartItems, selectCartTotal } from '../redux/cartSlice';
-import { UserContext } from './UserContext'; 
+// import { UserContext } from './UserContext'; 
 import { addOrder } from '../redux/orderSlice';
 import Button from '../components/UI/Button';
 
@@ -49,7 +49,7 @@ const detectBrand = (number) => {
 const Checkout = () => {
     const navigate  = useNavigate();
     const dispatch  = useDispatch();
-    const { user } = useContext(UserContext); 
+    const user      = useSelector((state) => state.user);
     const cartItems = useSelector(selectCartItems);
     const subtotal  = useSelector(selectCartTotal);
     const total     = subtotal;

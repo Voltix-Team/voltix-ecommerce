@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,8 +17,11 @@ import Checkout from './pages/Checkout';
 import ProfilePage from './pages/Profile';
 import Wishlist from './pages/Wishlist';
 import Orders from './pages/Orders'; 
-import { UserProvider } from './pages/UserContext';
+//import { UserProvider } from './pages/UserContext';
 import { Toaster } from 'react-hot-toast';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase/firebaseConfig';
+import {setUser} from './redux/userSlice';
 
 const ORDERS_KEY = 'voltix_orders';
 
@@ -26,7 +29,16 @@ function App() {
   const dispatch = useDispatch();
   const cartCount = useSelector(selectCartCount);
   const [toast, setToast] = useState(null);
+  const {loading, data: user } = useSelector((state) => state.user);
+  
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      dispatch(setUser(firebaseUser));
+    });
 
+    return () => unsubscribe();
+  }, [dispatch]);
+  if(loading) return <div>Loading...</div>
   const showToast = (product) => {
     setToast(product);
     setTimeout(() => setToast(null), 2500);
@@ -40,7 +52,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        <UserProvider>
+        {/* <UserProvider> */}
           <Navbar cartCount={cartCount} />
 
           <main className="flex-1 flex flex-col">
@@ -57,7 +69,7 @@ function App() {
               <Route path="/wishlist" element={<Wishlist addToCart={addToCart} />} />
             </Routes>
           </main>
-        </UserProvider>
+        {/* </UserProvider> */}
 
         <Footer />
 
