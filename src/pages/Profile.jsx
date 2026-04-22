@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Edit, MapPin, CheckCircle2, X, Phone, User, Home } from 'lucide-react';
-// import { UserContext } from './UserContext';
 import OrderCard from '../components/UI/OrderCard';
 import { useSelector, useDispatch } from 'react-redux'; 
 import { logoutUser, updateUserProfile } from '../redux/userSlice'; 
@@ -10,9 +9,8 @@ import Input from '../components/UI/Input';
 
 
 const ProfilePage = () => {
-    // const { user, logout, loading, updateUser } = useContext(UserContext);
     const dispatch = useDispatch();
-    const { data: user, loading } = useSelector((state) => state.user);
+    const { data : user, loading } = useSelector((state) => state.user);
     const allOrders = useSelector(selectAllOrders);
 
     const [modalOpen, setModalOpen] = useState(false);

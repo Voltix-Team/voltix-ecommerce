@@ -4,7 +4,6 @@ import orderReducer from './orderSlice';
 import wishlistReducer from './wishlistSlice';
 import userReducer from './userSlice';
 
-// STEP B : building the store  -> a Component that will have our data 
 const store = configureStore({
     // This combines three slice reducers into one store. 
     reducer: {

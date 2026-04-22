@@ -2,8 +2,8 @@ import React, { use, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart, selectCartCount } from './redux/cartSlice';
-
+import { addToCart, loadCart, selectCartCount } from './redux/cartSlice';
+import { loadWishlist } from './redux/wishlistSlice';
 
 import Navbar from './components/Layout/Navbar/Navbar';
 import Footer from './components/Layout/Footer';
@@ -17,28 +17,34 @@ import Checkout from './pages/Checkout';
 import ProfilePage from './pages/Profile';
 import Wishlist from './pages/Wishlist';
 import Orders from './pages/Orders'; 
-//import { UserProvider } from './pages/UserContext';
 import { Toaster } from 'react-hot-toast';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase/firebaseConfig';
-import {setUser} from './redux/userSlice';
-
-const ORDERS_KEY = 'voltix_orders';
+import { setUser } from './redux/userSlice';
 
 function App() {
   const dispatch = useDispatch();
   const cartCount = useSelector(selectCartCount);
   const [toast, setToast] = useState(null);
-  const {loading, data: user } = useSelector((state) => state.user);
+  const { loading, data: user } = useSelector((state) => state.user);
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      dispatch(setUser(firebaseUser));
+        dispatch(setUser(firebaseUser));
+        if (firebaseUser) {
+            dispatch(loadCart({ uid: firebaseUser.uid }));
+            dispatch(loadWishlist({ uid: firebaseUser.uid }));
+        } else {
+            // User just logged out — force clear immediately
+            dispatch(loadCart({ uid: null }));
+            dispatch(loadWishlist({ uid: null }));
+        }
     });
-
     return () => unsubscribe();
-  }, [dispatch]);
-  if(loading) return <div>Loading...</div>
+}, [dispatch]);
+
+  if (loading) return <div>Loading...</div>;
+
   const showToast = (product) => {
     setToast(product);
     setTimeout(() => setToast(null), 2500);
@@ -47,12 +53,11 @@ function App() {
   const handleAddToCart = (product) => {
     dispatch(addToCart(product));
     showToast(product);
-  }
+  };
 
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
-        {/* <UserProvider> */}
           <Navbar cartCount={cartCount} />
 
           <main className="flex-1 flex flex-col">
@@ -66,10 +71,9 @@ function App() {
               <Route path="/success" element={<Success />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/orders" element={<Orders />} />
-              <Route path="/wishlist" element={<Wishlist addToCart={addToCart} />} />
+              <Route path="/wishlist" element={<Wishlist addToCart={handleAddToCart} />} />            
             </Routes>
           </main>
-        {/* </UserProvider> */}
 
         <Footer />
 
