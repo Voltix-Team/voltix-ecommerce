@@ -14,7 +14,7 @@ const buildUser = (firebaseUser) => ({
     memberSince: firebaseUser.metadata?.creationTime
         ? new Date(firebaseUser.metadata.creationTime).toLocaleDateString('en-US', {
             month: 'long', year: 'numeric'
-          })
+        })
         : 'Unknown',
     address: { street: '', suite: '', city: '', state: '', zip: '', country: '' },
 });
