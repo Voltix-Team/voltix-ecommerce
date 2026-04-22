@@ -1,10 +1,9 @@
-import { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Lock, ChevronDown, ShieldCheck, CreditCard, Banknote } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearCart, selectCartItems, selectCartTotal } from '../redux/cartSlice';
-import { UserContext } from './UserContext'; 
-import { addOrder } from '../redux/orderSlice';
+import { addOrder, selectLastOrderId } from '../redux/orderSlice';
 import Button from '../components/UI/Button';
 
 const cities = [
@@ -49,15 +48,21 @@ const detectBrand = (number) => {
 const Checkout = () => {
     const navigate  = useNavigate();
     const dispatch  = useDispatch();
-    const { user } = useContext(UserContext); 
+
+    // ← Fixed: was reading state.user directly (the whole slice object)
+    const { data: user } = useSelector((state) => state.user);
+    const lastOrderId = useSelector(selectLastOrderId);
     const cartItems = useSelector(selectCartItems);
     const subtotal  = useSelector(selectCartTotal);
     const total     = subtotal;
 
     const [form, setForm] = useState({
-        email: '', phone: '',
-        fullName: '', street: '',
-        city: 'Amman', postalCode: '',
+        email: user?.email || '',  // ← pre-fill email from logged in user
+        phone: user?.phone || '',  // ← pre-fill phone if saved in profile
+        fullName: user?.name || '',
+        street: user?.address?.street || '',
+        city: user?.address?.city || 'Amman',
+        postalCode: user?.address?.zip || '',
     });
 
     const [paymentMethod, setPaymentMethod] = useState('card');
@@ -114,14 +119,13 @@ const Checkout = () => {
         if (Object.keys(errs).length) { setErrors(errs); return; }
         setErrors({});
         setLoading(true);
-        
+
         // Simulating API call
         await new Promise(r => setTimeout(r, 1400));
         setLoading(false);
 
-        // Updated Logic to save to Redux/History
         const orderData = {
-            userEmail: user?.email, 
+            userEmail: user?.email,
             items: cartItems,
             subtotal,
             total,
@@ -136,7 +140,9 @@ const Checkout = () => {
 
         dispatch(addOrder(orderData));
         dispatch(clearCart());
-        navigate('/success');
+
+        // lastOrderId is now in Redux state via selectLastOrderId
+        navigate('/success', { state: { orderId: lastOrderId } });
     };
 
     const brand = detectBrand(card.number);

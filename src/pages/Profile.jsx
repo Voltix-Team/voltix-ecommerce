@@ -1,15 +1,16 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Edit, MapPin, CheckCircle2, X, Phone, User, Home } from 'lucide-react';
-import { UserContext } from './UserContext';
 import OrderCard from '../components/UI/OrderCard';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux'; 
+import { logoutUser, updateUserProfile } from '../redux/userSlice'; 
 import { selectAllOrders } from '../redux/orderSlice';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
 
+
 const ProfilePage = () => {
-    const { user, logout, loading, updateUser } = useContext(UserContext);
-    
+    const dispatch = useDispatch();
+    const { data : user, loading } = useSelector((state) => state.user);
     const allOrders = useSelector(selectAllOrders);
 
     const [modalOpen, setModalOpen] = useState(false);
@@ -24,15 +25,16 @@ const ProfilePage = () => {
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     const openModal = () => {
+        const mask = (val) => (typeof val === 'string' ? val : '');
         setForm({
-            name:    user.name    || '',
-            phone:   user.phone   || '',
-            street:  user.address?.street  || '',
-            suite:   user.address?.suite   || '',
-            city:    user.address?.city    || '',
-            state:   user.address?.state   || '',
-            zip:     user.address?.zip     || '',
-            country: user.address?.country || '',
+            name:   mask(user.name)   || '',
+            phone:   mask(user.phone)   || '',
+            street:  mask(user.address?.street)  || '',
+            suite:   mask(user.address?.suite)   || '',
+            city:    mask(user.address?.city)    || '',
+            state:   mask(user.address?.state)   || '',
+            zip:     mask(user.address?.zip)     || '',
+            country: mask(user.address?.country) || '',
         });
         setErrors({});
         setModalOpen(true);
@@ -56,7 +58,7 @@ const ProfilePage = () => {
         }
 
         setSaving(true);
-        await updateUser({
+        await dispatch(updateUserProfile({
             name: form.name,
             phone: form.phone,
             address: {
@@ -67,12 +69,22 @@ const ProfilePage = () => {
                 zip: form.zip,
                 country: form.country,
             },
-        });
+        }));
         setSaving(false);
         setModalOpen(false);
         setToast(true);
         setTimeout(() => setToast(false), 2500);
     };
+    const handleLogout = () => {
+        dispatch(logoutUser());
+    };
+    const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ 
+        ...prev, 
+        [name]: value // This ensures only the string 'value' goes into state
+    }));
+};
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading profile...</div>;
     if (!user) return <div className="min-h-screen flex items-center justify-center">You are not logged in.</div>;
@@ -99,7 +111,7 @@ const ProfilePage = () => {
                 <div className="flex items-center gap-6">
                     <div className="w-24 h-24 bg-white border-2 border-blue-600 rounded-xl overflow-hidden flex items-center justify-center">
                         {user.avatar ? (
-                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                            <img src={user?.avatar} alt={user.name} className="w-full h-full object-cover" />
                         ) : (
                             <span className="text-3xl font-bold text-blue-600">{user.name?.charAt(0).toUpperCase()}</span>
                         )}
@@ -113,7 +125,7 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="flex gap-4 w-full md:w-auto">
-                    <Button onClick={logout} >
+                    <Button onClick={handleLogout} >
                         Logout
                     </Button>
                     <Button onClick={openModal}>
@@ -210,8 +222,8 @@ const ProfilePage = () => {
                                     <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Personal</p>
                                 </div>
                                 <div className="space-y-4">
-                                    <Input label="Full Name" name="name" value={form.name} onChange={set('name')} error={errors.name} />
-                                    <Input label="Phone Number" name="phone" value={form.phone} onChange={set('phone')} type="tel" placeholder="+962 79 000 0000" error={errors.phone} />
+                                    <Input label="Full Name" name="name" value={form.name || ''} onChange={handleChange} error={errors.name} />
+                                    <Input label="Phone Number" name="phone" value={form.phone || ''} onChange={handleChange} type="tel" placeholder="+962 79 000 0000" error={errors.phone} />
                                 </div>
                             </div>
 
@@ -221,15 +233,15 @@ const ProfilePage = () => {
                                     <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Shipping Address</p>
                                 </div>
                                 <div className="space-y-4">
-                                    <Input label="Street Address" name="street" value={form.street} onChange={set('street')} placeholder="123 Main St" />
-                                    <Input label="Suite / Apt (optional)" name="suite" value={form.suite} onChange={set('suite')} placeholder="Suite 400" />
+                                    <Input label="Street Address" name="street" value={form.street || ''} onChange={handleChange} placeholder="123 Main St" />
+                                    <Input label="Suite / Apt (optional)" name="suite" value={form.suite || ''} onChange={handleChange} placeholder="Suite 400" />
                                     <div className="grid grid-cols-2 gap-3">
-                                        <Input label="City" name="city" value={form.city} onChange={set('city')} placeholder="Amman" />
-                                        <Input label="State / Region" name="state" value={form.state} onChange={set('state')} placeholder="Amman" />
+                                        <Input label="City" name="city" value={form.city || ''} onChange={handleChange} placeholder="Amman" />
+                                        <Input label="State / Region" name="state" value={form.state || ''} onChange={handleChange} placeholder="Amman" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <Input label="Postal Code" name="zip" value={form.zip} onChange={set('zip')} placeholder="00000" />
-                                        <Input label="Country" name="country" value={form.country} onChange={set('country')} placeholder="Jordan" />
+                                        <Input label="Postal Code" name="zip" value={form.zip || ''} onChange={handleChange} placeholder="00000" />
+                                        <Input label="Country" name="country" value={form.country || ''} onChange={handleChange} placeholder="Jordan" />
                                     </div>
                                 </div>
                             </div>

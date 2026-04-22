@@ -1,19 +1,13 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Package } from 'lucide-react';
 import OrderCard from '../components/UI/OrderCard';
 import Button from '../components/UI/Button';
-
-const ORDERS_KEY = 'voltix_orders';
+import { selectAllOrders } from '../redux/orderSlice';
 
 const Orders = () => {
     const navigate = useNavigate();
-    const [orders, setOrders] = useState([]);
-
-    useEffect(() => {
-        const saved = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
-        setOrders(saved);
-    }, []);
+    const orders = useSelector(selectAllOrders);
 
     return (
         <div className="max-w-3xl mx-auto px-6 py-12 min-h-screen">
@@ -33,7 +27,6 @@ const Orders = () => {
                     ))}
                 </div>
             ) : (
-                /* empty state */
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
                         <Package className="w-10 h-10 text-gray-300" />
@@ -42,9 +35,7 @@ const Orders = () => {
                     <p className="text-gray-500 mb-8 max-w-sm">
                         Looks like you haven't placed any orders. Start shopping and your orders will appear here.
                     </p>
-                    <Button
-                        onClick={() => navigate('/')}
-                    >
+                    <Button onClick={() => navigate('/')}>
                         Start Shopping
                     </Button>
                 </div>

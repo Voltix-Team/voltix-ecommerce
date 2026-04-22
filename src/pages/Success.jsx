@@ -1,10 +1,14 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import Button from '../components/UI/Button';
 
 const Success = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  //  Read the real order ID passed from Checkout, fallback if accessed directly
+  const orderId = location.state?.orderId || 'VX-000000';
 
   const getEstimatedDate = () => {
     const today = new Date();
@@ -15,9 +19,6 @@ const Success = () => {
       year: 'numeric'
     }).toUpperCase();
   };
-
-  // Generate a random order ID once on mount
-  const orderId = `#VX-${Math.floor(10000 + Math.random() * 90000)}`;
 
   return (
     <div className="flex items-center justify-center flex-1 px-4 py-12">
@@ -36,7 +37,7 @@ const Success = () => {
         <div className="bg-slate-50 rounded-2xl p-6 mb-8 space-y-3 border border-slate-100">
           <div className="flex justify-between text-sm">
             <span className="text-slate-400 font-medium">Order ID</span>
-            <span className="font-bold text-slate-800">{orderId}</span>
+            <span className="font-bold text-slate-800">#{orderId}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-400 font-medium">Status</span>
@@ -57,10 +58,10 @@ const Success = () => {
             Return to Home
           </Button>
           <Button
-            onClick={() => alert('Order tracking coming soon!')}
+            onClick={() => navigate('/orders')}
             className="w-1/2"
           >
-            Track Order
+            View Orders
           </Button>
         </div>
 

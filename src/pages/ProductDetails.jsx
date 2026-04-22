@@ -4,14 +4,14 @@ import { fetchProductById } from '../services/api';
 import StarRating from '../components/UI/StarRating';
 import ReviewSection from '../components/UI/ReviewSection';
 import Button from '../components/UI/Button';
-import { UserContext } from './UserContext';
 import { toast } from 'react-hot-toast';
 import { useProtectedAction } from '../hooks/useProtectedAction';
+import { useSelector } from 'react-redux';
 
 const ProductDetails = ({ addToCart }) => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useContext(UserContext);
+    const { data: user } = useSelector((state) => state.user);
     
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);

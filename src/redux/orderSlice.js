@@ -24,22 +24,26 @@ const orderSlice = createSlice({
     name: 'orders',
     initialState: {
         items: loadOrdersFromStorage(),
+        lastOrderId: null, // stores the most recently placed order ID
     },
     reducers: {
         addOrder: (state, action) => {
             const newOrder = {
-                id: `ord_${Date.now()}`,
-                userEmail: action.payload.userEmail,   // Important for filtering per user
+                // generates an id that has vx as a prefix and a timestamp in milliseconds for the date now
+                id: `VX-${Date.now()}`,
+                userEmail: action.payload.userEmail,
                 createdAt: new Date().toISOString(),
                 status: 'confirmed',
                 ...action.payload,
             };
 
             state.items.unshift(newOrder); // newest first
+            state.lastOrderId = newOrder.id; // mutate draft only, no return
             saveOrdersToStorage(state.items);
         },
         clearAllOrders: (state) => {
             state.items = [];
+            state.lastOrderId = null;
             localStorage.removeItem(ORDERS_STORAGE_KEY);
         },
     },
@@ -47,5 +51,6 @@ const orderSlice = createSlice({
 
 export const { addOrder, clearAllOrders } = orderSlice.actions;
 export const selectAllOrders = (state) => state.orders.items;
+export const selectLastOrderId = (state) => state.orders.lastOrderId;
 
 export default orderSlice.reducer;

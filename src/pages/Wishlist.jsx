@@ -6,7 +6,6 @@ import { selectWishlistItems, removeFromWishlist } from "../redux/wishlistSlice"
 
 const Wishlist = ({ addToCart }) => {
     const navigate = useNavigate();
-    // Step D — Reading state in a component:
     const dispatch = useDispatch();
     const items = useSelector(selectWishlistItems);
 
