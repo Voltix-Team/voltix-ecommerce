@@ -10,8 +10,7 @@ import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../redux/userSlice';           // ← Django login thunk
-import { loadCart } from '../redux/cartSlice';            // ← load this user's cart after login
-import { loadWishlist } from '../redux/wishlistSlice';    // ← load this user's wishlist after login
+import { fetchWishlist } from '../redux/wishlistSlice';   // ← load this user's wishlist after login
 import Button from "../components/UI/Button";
 import Input from "../components/UI/Input";
 
@@ -37,11 +36,8 @@ const Login = () => {
         const result = await dispatch(loginUser(formData));
 
         if (loginUser.fulfilled.match(result)) {
-            const userId = result.payload.user.id;
-
-            // load this specific user's cart and wishlist now that we know who they are
-            dispatch(loadCart({ uid: userId }));
-            dispatch(loadWishlist({ uid: userId }));
+            // fetch this user's wishlist from the API now that we have a token
+            dispatch(fetchWishlist());
 
             navigate("/");
         } else {

@@ -1,24 +1,16 @@
-import React, { useState } from 'react';
-import { Edit, MapPin, CheckCircle2, X, Phone, User, Home } from 'lucide-react';
-import OrderCard from '../components/UI/OrderCard';
-import { useSelector, useDispatch } from 'react-redux';
-import { logoutUser, updateUserProfile } from '../redux/userSlice';
-import { selectAllOrders } from '../redux/orderSlice';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Edit, MapPin, CheckCircle2, X, Phone, User, Home, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import OrderCard from '../components/UI/OrderCard';
 import { useSelector, useDispatch } from 'react-redux';
 import { logoutUser, updateUserProfile } from '../redux/userSlice';
 import { fetchOrders, selectAllOrders, selectOrdersStatus } from '../redux/orderSlice';
+import OrderCard from '../components/UI/OrderCard';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
 
 const ProfilePage = () => {
     const dispatch = useDispatch();
     const { data: user, loading } = useSelector((state) => state.user);
-    const allOrders = useSelector(selectAllOrders);
-    const { data : user, loading } = useSelector((state) => state.user);
     const userOrders = useSelector(selectAllOrders);
     const ordersStatus = useSelector(selectOrdersStatus);
 
@@ -28,10 +20,6 @@ const ProfilePage = () => {
     const [errors,    setErrors]    = useState({});
     const [form,      setForm]      = useState({});
 
-    // filter orders for this user only
-    const userOrders = allOrders
-        .filter(o => o.userEmail === user?.email)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     useEffect(() => {
         if (user && ordersStatus === 'idle') dispatch(fetchOrders());
     }, [user, ordersStatus, dispatch]);
@@ -123,20 +111,14 @@ const ProfilePage = () => {
                     </div>
                 </div>
                 <div className="flex gap-4 w-full md:w-auto">
-                    <Button onClick={handleLogout}>Logout</Button>
-                    <Button onClick={openModal}>Update Profile</Button>
                     <Link
                         to="/orders"
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-blue-200 text-blue-600 font-semibold text-sm hover:bg-blue-50 transition-colors"
                     >
                         <Package size={16} /> My Orders
                     </Link>
-                    <Button onClick={handleLogout} >
-                        Logout
-                    </Button>
-                    <Button onClick={openModal}>
-                        Update Profile
-                    </Button>
+                    <Button onClick={handleLogout}>Logout</Button>
+                    <Button onClick={openModal}>Update Profile</Button>
                 </div>
             </div>
 

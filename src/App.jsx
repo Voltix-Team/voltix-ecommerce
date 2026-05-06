@@ -8,11 +8,9 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart, loadCart, selectCartCount } from './redux/cartSlice';
-import { loadWishlist } from './redux/wishlistSlice';
-import { loadUserFromToken } from './redux/userSlice'; // ← replaces Firebase onAuthStateChanged
 import { addToCart, selectCartCount } from './redux/cartSlice';
 import { fetchWishlist } from './redux/wishlistSlice';
+import { loadUserFromToken } from './redux/userSlice'; // ← replaces Firebase onAuthStateChanged
 
 import Navbar        from './components/Layout/Navbar/Navbar';
 import Footer        from './components/Layout/Footer';
@@ -44,20 +42,9 @@ function App() {
     // 3. if no or expired → stay logged out (loading becomes false, data stays null)
     dispatch(loadUserFromToken()).then((action) => {
       if (action.payload?.id) {
-        // token was valid and user was loaded
-        // load this specific user's cart and wishlist from localStorage
-        dispatch(loadCart({ uid: action.payload.id }));
-        dispatch(loadWishlist({ uid: action.payload.id }));
-      } else {
-        // no token or invalid → clear cart and wishlist
-        dispatch(loadCart({ uid: null }));
-        dispatch(loadWishlist({ uid: null }));
+        // token was valid → fetch the user's wishlist from the API
+        dispatch(fetchWishlist());
       }
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-        dispatch(setUser(firebaseUser));
-        if (firebaseUser) {
-            dispatch(fetchWishlist());
-        }
     });
   }, [dispatch]);
 
