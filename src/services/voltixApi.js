@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { auth } from '../firebase/firebaseConfig';
+import { getAccessToken } from '../redux/userSlice';
 
 const voltixApi = axios.create({
     baseURL: process.env.REACT_APP_VOLTIX_API_BASE_URL || 'http://localhost:8000/api',
@@ -9,10 +9,9 @@ const voltixApi = axios.create({
     },
 });
 
-voltixApi.interceptors.request.use(async (config) => {
-    const user = auth.currentUser;
-    if (user) {
-        const token = await user.getIdToken();
+voltixApi.interceptors.request.use((config) => {
+    const token = getAccessToken();
+    if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

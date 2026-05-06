@@ -1,23 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useLocation } from "react-router-dom"; // Hook to check the current URL
+import { useSelector } from "react-redux";
 import { Share2, Globe } from "lucide-react";
-import { auth } from "../../firebase/firebaseConfig";
-import { onAuthStateChanged } from "firebase/auth";
 
 const Footer = () => {
-    const [user, setUser] = useState(null);
+    const user = useSelector((state) => state.user.data);
     const location = useLocation();
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            if (firebaseUser) {
-                setUser(firebaseUser);
-            } else {
-                setUser(null);
-            }
-        });
-        return () => unsubscribe();
-    }, []);
 
     // NEW : Check if we are currently on the Login or Signup page
     const isAuthPage =  location.pathname === "/signup" ||  location.pathname === "/Login";;
