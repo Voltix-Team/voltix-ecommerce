@@ -2,13 +2,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, Menu, X, Heart, Search } from 'lucide-react';
 import logo from '../../../assets/Logo.png';
 import { useState } from 'react';
-import { signOut } from "firebase/auth";
-import { auth } from "../../../firebase/firebaseConfig";
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../../../redux/userSlice';
 import Button from '../../UI/Button';
 
 const LoggedInNavbar = ({ cartCount = 0, searchTerm, setSearchTerm, handleSearch }) => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const handleLogout = async () => {
+        await dispatch(logoutUser());
+        navigate('/login');
+    };
 
     return (
         <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -60,8 +66,8 @@ const LoggedInNavbar = ({ cartCount = 0, searchTerm, setSearchTerm, handleSearch
                             <span className="hidden lg:block text-sm font-medium">My Account</span>
                         </Button>
                         <Button
-                            variant="danger"                  
-                            onClick={() => signOut(auth).then(() => navigate('/login'))}
+                            variant="danger"
+                            onClick={handleLogout}
                             title="Log out"
                             aria-label="Log out"
                         >
