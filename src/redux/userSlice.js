@@ -1,96 +1,183 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { auth } from '../firebase/firebaseConfig';
-import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
-import { redirect } from 'react-router-dom';
 
+// base URL for all API calls — reads from .env file
+// in your React .env file add: REACT_APP_API_URL=http://127.0.0.1:8000/api
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api';
 
-const loadExtras = (uid) => {
-    try {
-        const saved = localStorage.getItem(`user_extras_${uid}`);
-        return saved ? JSON.parse(saved) : {};
-    } catch { return {}; }
+// ── token helpers ─────────────────────────────────────────────────────────────
+
+export const saveTokens = (access, refresh) => {
+    localStorage.setItem('voltix_access', access);
+    localStorage.setItem('voltix_refresh', refresh);
 };
 
-const saveExtras = (uid, fields) => {
-    try {
-        localStorage.setItem(`user_extras_${uid}`, JSON.stringify(fields));
-    } catch {}
+export const clearTokens = () => {
+    localStorage.removeItem('voltix_access');
+    localStorage.removeItem('voltix_refresh');
 };
 
-const buildUser = (firebaseUser) => {
-    const extras = loadExtras(firebaseUser.uid);
-    return {
-        uid: firebaseUser.uid,
-        name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-        email: firebaseUser.email,
-        phone: extras.phone || '',
-        avatar: firebaseUser.photoURL || null,
-        memberSince: firebaseUser.metadata?.creationTime
-            ? new Date(firebaseUser.metadata.creationTime).toLocaleDateString('en-US', {
-                month: 'long', year: 'numeric'
-            })
-            : 'Unknown',
-        address: extras.address || { street: '', suite: '', city: '', state: '', zip: '', country: '' },
-    };
-};
+export const getAccessToken  = () => localStorage.getItem('voltix_access');
+export const getRefreshToken = () => localStorage.getItem('voltix_refresh');
 
-/* used createAsyncThunk to handle async operations API Calls */
-export const logoutUser = createAsyncThunk('user/Logout', async () => {
-    await signOut(auth);
-});
 
-export const updateUserProfile = createAsyncThunk('user/updateProfile', async (fields) => {
-    const firebaseUser = auth.currentUser;
-    if (!firebaseUser) return;
-    if (fields.name && fields.name !== firebaseUser.displayName) {
-        await updateProfile(firebaseUser, { displayName: fields.name });
+// ── thunks ────────────────────────────────────────────────────────────────────
+
+export const loadUserFromToken = createAsyncThunk(
+    'user/loadFromToken',
+    async (_, { rejectWithValue }) => {
+        const token = getAccessToken();
+        if (!token) return rejectWithValue('No token');
+        const res = await fetch(`${BASE_URL}/auth/me/`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) return rejectWithValue('Token invalid');
+        return await res.json();
     }
-    return fields;
-});
+);
+
+export const registerUser = createAsyncThunk(
+    'user/register',
+    async (formData, { rejectWithValue }) => {
+        const res = await fetch(`${BASE_URL}/auth/register/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (!res.ok) return rejectWithValue(data);
+        return data;
+    }
+);
+
+export const verifyEmail = createAsyncThunk(
+    'user/verifyEmail',
+    async (formData, { rejectWithValue }) => {
+        const res = await fetch(`${BASE_URL}/auth/verify-email/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (!res.ok) return rejectWithValue(data);
+        return data;
+    }
+);
+
+export const loginUser = createAsyncThunk(
+    'user/login',
+    async (formData, { rejectWithValue }) => {
+        const res = await fetch(`${BASE_URL}/auth/login/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (!res.ok) return rejectWithValue(data);
+        saveTokens(data.access, data.refresh);
+        return data;
+    }
+);
+
+export const logoutUser = createAsyncThunk(
+    'user/logout',
+    async (_, { rejectWithValue }) => {
+        const access  = getAccessToken();
+        const refresh = getRefreshToken();
+        try {
+            await fetch(`${BASE_URL}/auth/logout/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${access}`,
+                },
+                body: JSON.stringify({ refresh }),
+            });
+        } catch (e) {}
+        clearTokens();
+        return true;
+    }
+);
+
+export const updateUserProfile = createAsyncThunk(
+    'user/updateProfile',
+    async (fields, { rejectWithValue }) => {
+        const token = getAccessToken();
+        const res = await fetch(`${BASE_URL}/auth/me/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(fields),
+        });
+        const data = await res.json();
+        if (!res.ok) return rejectWithValue(data);
+        return data;
+    }
+);
+
+export const requestPasswordReset = createAsyncThunk(
+    'user/requestReset',
+    async (email, { rejectWithValue }) => {
+        const res = await fetch(`${BASE_URL}/auth/password-reset/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+        if (!res.ok) return rejectWithValue(data);
+        return data;
+    }
+);
+
+export const confirmPasswordReset = createAsyncThunk(
+    'user/confirmReset',
+    async (formData, { rejectWithValue }) => {
+        const res = await fetch(`${BASE_URL}/auth/password-reset/confirm/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+        if (!res.ok) return rejectWithValue(data);
+        return data;
+    }
+);
+
+
+// ── slice ─────────────────────────────────────────────────────────────────────
 
 const userSlice = createSlice({
-    name: 'user', initialState: {
-        data: null,
+    name: 'user',
+    initialState: {
+        data:    null,
         loading: true,
+        error:   null,
     },
     reducers: {
-        setUser: (state, action) => {
-            state.data = action.payload ? buildUser(action.payload) : null;
-            state.loading = false;
-        },
-        setLoading: (state, action) => {
-            state.loading = action.payload;
-        }
+        clearError: (state) => { state.error = null; },
     },
     extraReducers: (builder) => {
-    builder
-        .addCase(logoutUser.pending, (state) => {
-            state.loading = true; // ← forces UI to wait
-        })
-        .addCase(logoutUser.fulfilled, (state) => {
-            state.data = null;
-        })
-        .addCase(logoutUser.rejected, (state, action) => {
-            console.error('Logout failed:', action.error.message);
-        })
-        .addCase(updateUserProfile.fulfilled, (state, action) => {
-            if (state.data && action.payload) {
-                state.data = {
-                    ...state.data,
-                    name: action.payload.name || state.data.name,
-                    phone: action.payload.phone ?? state.data.phone,
-                    address: {
-                        ...(state.data.address || {}),
-                        ...(action.payload.address || {})
-                    }
-                };
-                saveExtras(state.data.uid, {
-                    phone: state.data.phone,
-                    address: state.data.address,
-                });
-            }
-        });
-},
+        builder
+        .addCase(loadUserFromToken.pending,   (state) => { state.loading = true; })
+        .addCase(loadUserFromToken.fulfilled, (state, action) => { state.data = action.payload; state.loading = false; })
+        .addCase(loadUserFromToken.rejected,  (state) => { state.data = null; state.loading = false; })
+
+        .addCase(loginUser.pending,   (state) => { state.loading = true; state.error = null; })
+        .addCase(loginUser.fulfilled, (state, action) => { state.data = action.payload.user; state.loading = false; state.error = null; })
+        .addCase(loginUser.rejected,  (state, action) => { state.loading = false; state.error = action.payload; })
+
+        .addCase(logoutUser.fulfilled, (state) => { state.data = null; state.loading = false; })
+        .addCase(logoutUser.rejected,  (state) => { state.data = null; state.loading = false; })
+
+        .addCase(updateUserProfile.fulfilled, (state, action) => { state.data = action.payload; state.error = null; })
+        .addCase(updateUserProfile.rejected,  (state, action) => { state.error = action.payload; })
+
+        .addCase(registerUser.pending,   (state) => { state.loading = true; state.error = null; })
+        .addCase(registerUser.fulfilled, (state) => { state.loading = false; })
+        .addCase(registerUser.rejected,  (state, action) => { state.loading = false; state.error = action.payload; });
+    },
 });
-export const { setUser, setLoading } = userSlice.actions;
+
+export const { clearError } = userSlice.actions;
 export default userSlice.reducer;
