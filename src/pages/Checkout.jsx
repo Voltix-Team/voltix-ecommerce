@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, ChevronDown, ShieldCheck, CreditCard, Banknote } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { clearCart, selectCartItems, selectCartTotal } from '../redux/cartSlice';
-import { addOrder, selectLastOrderId } from '../redux/orderSlice';
+import { placeOrder } from '../redux/orderSlice';
 import Button from '../components/UI/Button';
 
 const cities = [
@@ -51,7 +51,6 @@ const Checkout = () => {
 
     // ← Fixed: was reading state.user directly (the whole slice object)
     const { data: user } = useSelector((state) => state.user);
-    const lastOrderId = useSelector(selectLastOrderId);
     const cartItems = useSelector(selectCartItems);
     const subtotal  = useSelector(selectCartTotal);
     const total     = subtotal;
@@ -70,8 +69,9 @@ const Checkout = () => {
         number: '', name: '', expiry: '', cvv: ''
     });
 
-    const [errors, setErrors]   = useState({});
-    const [loading, setLoading] = useState(false);
+    const [errors, setErrors]    = useState({});
+    const [loading, setLoading]  = useState(false);
+    const [apiError, setApiError] = useState('');
 
     const set = (field) => (e) => {
         setForm(p => ({ ...p, [field]: e.target.value }));
@@ -118,31 +118,18 @@ const Checkout = () => {
         const errs = validate();
         if (Object.keys(errs).length) { setErrors(errs); return; }
         setErrors({});
+        setApiError('');
         setLoading(true);
 
-        // Simulating API call
-        await new Promise(r => setTimeout(r, 1400));
-        setLoading(false);
-
-        const orderData = {
-            userEmail: user?.email,
-            items: cartItems,
-            subtotal,
-            total,
-            paymentMethod,
-            shipping: {
-                fullName: form.fullName,
-                street: form.street,
-                city: form.city,
-                postalCode: form.postalCode,
-            },
-        };
-
-        dispatch(addOrder(orderData));
-        dispatch(clearCart());
-
-        // lastOrderId is now in Redux state via selectLastOrderId
-        navigate('/success', { state: { orderId: lastOrderId } });
+        try {
+            const order = await dispatch(placeOrder()).unwrap();
+            dispatch(clearCart());
+            navigate('/success', { state: { orderId: order.id } });
+        } catch (err) {
+            setApiError(typeof err === 'string' ? err : 'Could not place order. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const brand = detectBrand(card.number);
@@ -368,6 +355,11 @@ const Checkout = () => {
                     </div>
 
                     <div className="px-8 py-6">
+                        {apiError && (
+                            <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+                                {apiError}
+                            </div>
+                        )}
                         <div className="flex items-end justify-between mb-1">
                             <div>
                                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-0.5">Total Amount</p>
