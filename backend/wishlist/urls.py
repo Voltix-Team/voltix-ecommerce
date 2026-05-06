@@ -1,4 +1,7 @@
 from django.urls import path
+from .views import WishlistView
 
 
-urlpatterns = []
+urlpatterns = [
+    path('', WishlistView.as_view(), name='wishlist-detail'),
+]

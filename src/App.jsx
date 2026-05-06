@@ -11,6 +11,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, loadCart, selectCartCount } from './redux/cartSlice';
 import { loadWishlist } from './redux/wishlistSlice';
 import { loadUserFromToken } from './redux/userSlice'; // ← replaces Firebase onAuthStateChanged
+import { addToCart, selectCartCount } from './redux/cartSlice';
+import { fetchWishlist } from './redux/wishlistSlice';
 
 import Navbar        from './components/Layout/Navbar/Navbar';
 import Footer        from './components/Layout/Footer';
@@ -51,6 +53,11 @@ function App() {
         dispatch(loadCart({ uid: null }));
         dispatch(loadWishlist({ uid: null }));
       }
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        dispatch(setUser(firebaseUser));
+        if (firebaseUser) {
+            dispatch(fetchWishlist());
+        }
     });
   }, [dispatch]);
 
