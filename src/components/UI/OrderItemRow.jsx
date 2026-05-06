@@ -1,7 +1,9 @@
 const OrderItemRow = ({ item }) => {
-  const name = item.title || item.name;
-  const image = item.thumbnail || item.image;
-  const lineTotal = (item.price * item.quantity).toFixed(2);
+  const product = item.product || {};
+  const name = product.title || product.name;
+  const image = product.thumbnail || product.image;
+  const price = Number(item.price);
+  const lineTotal = (price * item.quantity).toFixed(2);
 
   return (
     <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
@@ -14,7 +16,7 @@ const OrderItemRow = ({ item }) => {
         <div>
           <p className="text-sm font-semibold text-gray-800">{name}</p>
           <p className="text-xs text-gray-400 mt-0.5">
-            ${item.price.toFixed(2)} × {item.quantity}
+            ${price.toFixed(2)} × {item.quantity}
           </p>
         </div>
       </div>

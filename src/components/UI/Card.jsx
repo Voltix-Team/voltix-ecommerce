@@ -16,8 +16,14 @@ const ProductCard = ({ product, addToCart }) => {
     const toggleFavorite = (e) => {
         e.preventDefault();
         protectedAction(() => {
-            dispatch(toggleWishlist(product));
-            toast.success(isFavorite ? "Removed from wishlist" : "Added to wishlist");
+            dispatch(toggleWishlist(product.id))
+                .unwrap()
+                .then((res) => {
+                    toast.success(res.is_wishlisted ? "Added to wishlist" : "Removed from wishlist");
+                })
+                .catch((err) => {
+                    toast.error(err || "Could not update wishlist");
+                });
         }, "You must login first to use wishlist");
     };
 

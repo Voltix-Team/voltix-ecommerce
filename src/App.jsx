@@ -2,8 +2,8 @@ import React, { use, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart, loadCart, selectCartCount } from './redux/cartSlice';
-import { loadWishlist } from './redux/wishlistSlice';
+import { addToCart, selectCartCount } from './redux/cartSlice';
+import { fetchWishlist } from './redux/wishlistSlice';
 
 import Navbar from './components/Layout/Navbar/Navbar';
 import Footer from './components/Layout/Footer';
@@ -32,12 +32,7 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
         dispatch(setUser(firebaseUser));
         if (firebaseUser) {
-            dispatch(loadCart({ uid: firebaseUser.uid }));
-            dispatch(loadWishlist({ uid: firebaseUser.uid }));
-        } else {
-            // User just logged out — force clear immediately
-            dispatch(loadCart({ uid: null }));
-            dispatch(loadWishlist({ uid: null }));
+            dispatch(fetchWishlist());
         }
     });
     return () => unsubscribe();

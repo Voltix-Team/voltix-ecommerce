@@ -29,7 +29,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 # Every app that Django should know about must be listed here
 INSTALLED_APPS = [
-    # Django's built-in apps — admin panel, auth system, database, sessions, etc.
+    # Django's built-in apps — admin panel, auth system, database, sessions, etc. 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -219,27 +219,30 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # ── Email ─────────────────────────────────────────────────────────────────────
 
-# Which email backend to use — smtp.EmailBackend sends real emails via SMTP
-EMAIL_BACKEND       = os.getenv('EMAIL_BACKEND')
+# — Email Configuration ——————————————————————————————————————————————————————
+# — Email Configuration ——————————————————————————————————————————————————————
 
-# SMTP server address — we use Gmail's SMTP server
-EMAIL_HOST          = os.getenv('EMAIL_HOST')
+# We use the standard SMTP backend to send real emails via Brevo
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-# Port 587 is the standard port for SMTP with TLS
-EMAIL_PORT          = int(os.getenv('EMAIL_PORT', 587))
+# Brevo SMTP server address
+EMAIL_HOST = os.getenv('EMAIL_HOST')
 
-# TLS encrypts the connection to the mail server
-EMAIL_USE_TLS       = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+# Port 587 is the standard for SMTP with TLS/STARTTLS
+# We use int() because the port must be a number, not a string
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 
-# The Gmail address emails will be sent from
-EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
+# TLS encrypts the connection to the Brevo server
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 
-# App password generated from Gmail (not your regular Gmail password)
+# Your Brevo login email (the ID from image_8736f1.png)
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+
+# Your Brevo SMTP Key (the password from image_8736f1.png)
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
-# The "From" address shown in emails
-DEFAULT_FROM_EMAIL  = EMAIL_HOST_USER
-
+# The "From" name and address shown in the user's inbox
+DEFAULT_FROM_EMAIL = f"Voltix Shop <{EMAIL_HOST_USER}>"
 
 # ── Internationalisation ──────────────────────────────────────────────────────
 
