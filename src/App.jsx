@@ -1,48 +1,61 @@
-import React, { use, useEffect, useState } from 'react';
+// App.jsx
+// Root component of the React app.
+// Previously used Firebase onAuthStateChanged to detect login state.
+// Now uses loadUserFromToken — checks if a JWT token exists in localStorage
+// and fetches the user profile from Django on every page load/refresh.
+
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, loadCart, selectCartCount } from './redux/cartSlice';
 import { loadWishlist } from './redux/wishlistSlice';
+import { loadUserFromToken } from './redux/userSlice'; // ← replaces Firebase onAuthStateChanged
 
-import Navbar from './components/Layout/Navbar/Navbar';
-import Footer from './components/Layout/Footer';
-import Login from './pages/Login';
-import Home from './pages/Home';
-import Signup from './pages/Signup';
+import Navbar        from './components/Layout/Navbar/Navbar';
+import Footer        from './components/Layout/Footer';
+import Login         from './pages/Login';
+import Home          from './pages/Home';
+import Signup        from './pages/Signup';
+import VerifyEmail   from './pages/VerifyEmail';   // ← new page for OTP verification
 import ProductDetails from './pages/ProductDetails';
-import Cart from './pages/Cart';
-import Success from './pages/Success';
-import Checkout from './pages/Checkout';
-import ProfilePage from './pages/Profile';
-import Wishlist from './pages/Wishlist';
-import Orders from './pages/Orders'; 
-import { Toaster } from 'react-hot-toast';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './firebase/firebaseConfig';
-import { setUser } from './redux/userSlice';
+import Cart          from './pages/Cart';
+import Success       from './pages/Success';
+import Checkout      from './pages/Checkout';
+import ProfilePage   from './pages/Profile';
+import Wishlist      from './pages/Wishlist';
+import Orders        from './pages/Orders';
+import { Toaster }   from 'react-hot-toast';
 
 function App() {
-  const dispatch = useDispatch();
+  const dispatch  = useDispatch();
   const cartCount = useSelector(selectCartCount);
   const [toast, setToast] = useState(null);
-  const { loading, data: user } = useSelector((state) => state.user);
-  
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-        dispatch(setUser(firebaseUser));
-        if (firebaseUser) {
-            dispatch(loadCart({ uid: firebaseUser.uid }));
-            dispatch(loadWishlist({ uid: firebaseUser.uid }));
-        } else {
-            // User just logged out — force clear immediately
-            dispatch(loadCart({ uid: null }));
-            dispatch(loadWishlist({ uid: null }));
-        }
-    });
-    return () => unsubscribe();
-}, [dispatch]);
 
+  // read loading and user from Redux userSlice
+  const { loading, data: user } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    // on every page load or refresh:
+    // 1. check if a JWT access token exists in localStorage
+    // 2. if yes → call GET /api/auth/me/ to get the user profile
+    // 3. if no or expired → stay logged out (loading becomes false, data stays null)
+    dispatch(loadUserFromToken()).then((action) => {
+      if (action.payload?.id) {
+        // token was valid and user was loaded
+        // load this specific user's cart and wishlist from localStorage
+        dispatch(loadCart({ uid: action.payload.id }));
+        dispatch(loadWishlist({ uid: action.payload.id }));
+      } else {
+        // no token or invalid → clear cart and wishlist
+        dispatch(loadCart({ uid: null }));
+        dispatch(loadWishlist({ uid: null }));
+      }
+    });
+  }, [dispatch]);
+
+  // block rendering until we know the auth state
+  // prevents showing wrong navbar or redirecting before check completes
   if (loading) return <div>Loading...</div>;
 
   const showToast = (product) => {
@@ -58,26 +71,28 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
-          <Navbar cartCount={cartCount} />
+        <Navbar cartCount={cartCount} />
 
-          <main className="flex-1 flex flex-col">
-            <Routes>
-              <Route path="/" element={<Home addToCart={handleAddToCart} />} />
-              <Route path="/product/:id" element={<ProductDetails addToCart={handleAddToCart} />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/success" element={<Success />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/wishlist" element={<Wishlist addToCart={handleAddToCart} />} />            
-            </Routes>
-          </main>
+        <main className="flex-1 flex flex-col">
+          <Routes>
+            <Route path="/"             element={<Home addToCart={handleAddToCart} />} />
+            <Route path="/product/:id"  element={<ProductDetails addToCart={handleAddToCart} />} />
+            <Route path="/cart"         element={<Cart />} />
+            <Route path="/checkout"     element={<Checkout />} />
+            <Route path="/login"        element={<Login />} />
+            <Route path="/signup"       element={<Signup />} />
+            {/* new route — user lands here after signup to enter OTP */}
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/success"      element={<Success />} />
+            <Route path="/profile"      element={<ProfilePage />} />
+            <Route path="/orders"       element={<Orders />} />
+            <Route path="/wishlist"     element={<Wishlist addToCart={handleAddToCart} />} />
+          </Routes>
+        </main>
 
         <Footer />
 
-        {/* Toast */}
+        {/* Add to cart toast notification */}
         <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
           toast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}>
