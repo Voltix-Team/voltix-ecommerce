@@ -18,7 +18,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
-.package-lock.json
+package-lock.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -31,4 +31,3 @@ backend/db.sqlite3
 backend/.env
 
 # React / Frontend misc
-.package-lock.json
