@@ -31,3 +31,9 @@ backend/db.sqlite3
 backend/.env
 
 # React / Frontend misc
+
+
+#Python bytecode cache (Recursive fix)
+__pycache__/
+
+*.pyc
