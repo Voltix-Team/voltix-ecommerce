@@ -9,4 +9,4 @@ class WishlistItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = WishlistItem
         #  include 'product' for the GET display and 'product_id' if needed for reference
-        fields = ['id', 'product', 'added_at']
+        fields = ['id', 'product']
