@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(& \"c:\\\\Users\\\\amant\\\\voltix\\\\backend\\\\venv\\\\Scripts\\\\python.exe\" \"c:\\\\Users\\\\amant\\\\voltix\\\\backend\\\\manage.py\" runserver 8000)",
+      "Bash(./venv/Scripts/python.exe _email_check.py amantarakhan@gmail.com)"
+    ]
+  }
+}
