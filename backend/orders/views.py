@@ -22,7 +22,7 @@ class OrderView(APIView):
     def post(self, request):
         # Using atomic transaction ensures the whole process succeeds or fails together
         with transaction.atomic():
-            cart = CartItem.objects.filter(user=request.user) # this will give us the cart object for this user 
+            cart = CartItem.objects.filter(cart__user=request.user) # this will give us the cart object for this user 
             
             if not cart.exists(): 
                 return Response({"error": "the cart is empty"}, status=400)

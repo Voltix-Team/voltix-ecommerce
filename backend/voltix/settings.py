@@ -232,8 +232,11 @@ EMAIL_HOST = os.getenv('EMAIL_HOST')
 # We use int() because the port must be a number, not a string
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 
-# TLS encrypts the connection to the Brevo server
+# TLS encrypts the connection to the Brevo server (STARTTLS on port 587)
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+
+# SSL is the alternative wrapper used on port 465 — exactly one of TLS/SSL must be True
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
 
 # Your Brevo login email (the ID from image_8736f1.png)
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
