@@ -8,8 +8,8 @@ class Product(models.Model):
     category = models.CharField(max_length=100, default='general', blank=True)
     description = models.TextField(null=True, blank=True)
     
-    # Updated: This now allows direct uploads to Cloudinary
-    thumbnail = CloudinaryField('image', null=True, blank=True)
+  # This field connects this specific Product ID to a Cloudinary image
+    thumbnail = CloudinaryField('image', folder='products', null=True, blank=True)
     
     brand = models.CharField(max_length=100, null=True, blank=True)
     discount_percentage = models.FloatField(default=0)

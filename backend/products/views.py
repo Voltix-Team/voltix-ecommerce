@@ -8,6 +8,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    # This allows the view to accept image files from the device
+    # parser_classes = (MultiPartParser, FormParser)
 
     def get_queryset(self):
         queryset = Product.objects.all()
