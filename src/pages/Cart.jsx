@@ -13,8 +13,8 @@ const Cart = () => {
     const discount = 0;
     const total = subtotal;
 
-    const getName = (item) => item.title || item.name;
-    const getImage = (item) => item.thumbnail || item.image;
+    const getName = (item) => item.name || item.title || "Product";
+    const getImage = (item) => item.image || item.thumbnail || "";
     const getCategory = (item) => item.category || 'PRODUCT';
 
     return (

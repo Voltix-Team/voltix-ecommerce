@@ -1,24 +1,22 @@
 // Login.jsx
-// Previously used Firebase signInWithEmailAndPassword.
-// Now dispatches loginUser thunk from userSlice which calls POST /api/auth/login/
-// On success: saves JWT tokens to localStorage and loads user's cart + wishlist.
-// On failure: shows error message from Django response.
+// Calls POST /api/auth/login/ via loginUser thunk.
+// On success: saves JWT tokens, fetches wishlist and orders, redirects to home.
+// On failure: shows error from Django response.
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../redux/userSlice';           // ← Django login thunk
-import { fetchWishlist } from '../redux/wishlistSlice';   // ← load this user's wishlist after login
+import { loginUser } from '../redux/userSlice';
+import { fetchWishlist } from '../redux/wishlistSlice';
+import { fetchOrders } from '../redux/orderSlice';
 import Button from "../components/UI/Button";
 import Input from "../components/UI/Input";
 
 const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
-    // loading from Redux — true while the login request is in progress
     const { loading } = useSelector((state) => state.user);
 
     const [formData,   setFormData]   = useState({ email: "", password: "" });
@@ -32,19 +30,22 @@ const Login = () => {
         e.preventDefault();
         setLocalError("");
 
-        // dispatch loginUser — calls POST /api/auth/login/
         const result = await dispatch(loginUser(formData));
 
         if (loginUser.fulfilled.match(result)) {
-            // fetch this user's wishlist from the API now that we have a token
+            // login succeeded — load user data from the API
             dispatch(fetchWishlist());
-
+            dispatch(fetchOrders());
+            // navigate to home page
             navigate("/");
         } else {
-            // extract the error message Django returned
             const err = result.payload;
-            if (err?.non_field_errors) {
+            if (typeof err === 'string') {
+                setLocalError(err);
+            } else if (err?.non_field_errors) {
                 setLocalError(err.non_field_errors[0]);
+            } else if (err?.detail) {
+                setLocalError(err.detail);
             } else {
                 setLocalError("Invalid email or password.");
             }
@@ -62,7 +63,7 @@ const Login = () => {
                 </header>
 
                 <form onSubmit={handleLogin} className="space-y-3">
-                    <Input label="EMAIL"    name="email"    type="email"    placeholder="name@company.com" onChange={handleChange} />
+                    <Input label="EMAIL" name="email" type="email" placeholder="name@company.com" onChange={handleChange} />
                     <div className="relative">
                         <Input label="PASSWORD" name="password" type="password" placeholder="••••••••" onChange={handleChange} />
                         <Button type="button" variant="textLink" className="absolute right-0 top-0">Forgot?</Button>

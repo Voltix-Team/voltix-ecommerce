@@ -1,26 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/UI/Card';
 import { fetchProducts } from '../services/api';
 import Button from '../components/UI/Button';
 
 const Home = ({ addToCart }) => {
-    const [products, setProducts] = useState([]);
+    const [products,         setProducts]         = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading,          setLoading]          = useState(true);
 
     const [searchParams, setSearchParams] = useSearchParams();
-    const searchQuery = searchParams.get('search') || '';
+    const searchQuery    = searchParams.get('search')   || '';
     const activeCategory = searchParams.get('category') || 'all';
 
     const setActiveCategory = (cat) => {
         setSearchParams(prev => {
             const next = new URLSearchParams(prev);
-            if (cat === 'all') {
-                next.delete('category');
-            } else {
-                next.set('category', cat);
-            }
+            if (cat === 'all') next.delete('category');
+            else next.set('category', cat);
             return next;
         });
     };
@@ -31,25 +28,25 @@ const Home = ({ addToCart }) => {
             setProducts(data);
             setLoading(false);
         });
-    }, []);
+    }, [activeCategory]); // ← re-fetch when category changes
 
     useEffect(() => {
         let result = [...products];
 
         if (searchQuery) {
-            result = result.filter(p =>
-                p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                p.brand.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-        }
-
-        if (activeCategory !== 'all') {
-            result = result.filter(p => p.category === activeCategory);
+            result = result.filter(p => {
+                // Django uses 'name', dummyjson uses 'title' — handle both
+                const name  = (p.name  || p.title || '').toLowerCase();
+                const brand = (p.brand || '').toLowerCase();
+                const q     = searchQuery.toLowerCase();
+                return name.includes(q) || brand.includes(q);
+            });
         }
 
         setFilteredProducts(result);
-    }, [products, searchQuery, activeCategory]);
+    }, [products, searchQuery]);
 
+    // categories that exist in the Django DB
     const categories = ['all', 'smartphones', 'laptops', 'tablets', 'mobile-accessories'];
 
     if (loading) {
@@ -61,7 +58,9 @@ const Home = ({ addToCart }) => {
             {/* hero section */}
             <div className="bg-slate-800 text-white py-24">
                 <div className="max-w-6xl mx-auto px-6 text-center">
-                    <h1 className="text-6xl font-bold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">Unleash Power</h1>
+                    <h1 className="text-6xl font-bold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+                        Unleash Power
+                    </h1>
                     <p className="text-xl max-w-2xl mx-auto text-slate-400 font-medium mb-3">
                         Experience the next generation of premium electronics
                     </p>
@@ -74,7 +73,6 @@ const Home = ({ addToCart }) => {
                 </div>
             </div>
 
-            {/* ✅ id="products" added so scrollIntoView works */}
             <div id="products" className="max-w-6xl mx-auto px-6 py-12">
                 {/* category filters */}
                 <div className="flex flex-wrap gap-3 mb-10 justify-center">
@@ -85,8 +83,10 @@ const Home = ({ addToCart }) => {
                             onClick={() => setActiveCategory(cat)}
                             className={`${
                                 activeCategory === cat
-                                ? 'bg-blue-700 text-white shadow'
-                                : 'bg-white border border-gray-200 hover:bg-gray-50'}`}>
+                                    ? 'bg-blue-700 text-white shadow'
+                                    : 'bg-white border border-gray-200 hover:bg-gray-50'
+                            }`}
+                        >
                             {cat === 'all' ? 'All Products' : cat.charAt(0).toUpperCase() + cat.slice(1)}
                         </Button>
                     ))}
@@ -104,7 +104,9 @@ const Home = ({ addToCart }) => {
                 </div>
 
                 {filteredProducts.length === 0 && (
-                    <p className="text-center py-20 text-gray-500 text-xl">No products found in this category.</p>
+                    <p className="text-center py-20 text-gray-500 text-xl">
+                        No products found in this category.
+                    </p>
                 )}
             </div>
         </div>

@@ -1,13 +1,22 @@
+# admin.py
 from django.contrib import admin
 from .models import Product
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    # What columns to show in the list
-    list_display = ('name', 'category', 'price', 'stock', 'brand', 'discount_percentage')
+    # Fixed: added 'discount_percentage' to this list
+    list_display = (
+        'name', 
+        'category', 
+        'price', 
+        'stock', 
+        'brand', 
+        'rating', 
+        'discount_percentage'  # Must be here to be editable below
+    )
     
-    # Allow quick updates for stock and price directly in the table
-    list_editable = ('price', 'stock', 'discount_percentage')
+    # Allow quick updates for these fields
+    list_editable = ('price', 'stock', 'rating', 'discount_percentage')
     
     # Filters on the right sidebar
     list_filter = ('category', 'brand')
@@ -18,7 +27,7 @@ class ProductAdmin(admin.ModelAdmin):
     # Organize the layout of the "Edit" page
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'description', 'brand', 'category')
+            'fields': ('name', 'description', 'brand', 'category', 'rating')
         }),
         ('Pricing & Inventory', {
             'fields': ('price', 'discount_percentage', 'stock')
