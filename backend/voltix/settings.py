@@ -219,9 +219,6 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # ── Email ─────────────────────────────────────────────────────────────────────
 
-# — Email Configuration ——————————————————————————————————————————————————————
-# — Email Configuration ——————————————————————————————————————————————————————
-
 # We use the standard SMTP backend to send real emails via Brevo
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 

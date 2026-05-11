@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import voltixApi from "../services/voltixApi";
 import { logoutUser } from "./userSlice";
 
+// Fetch all orders for the logged-in user
 export const fetchOrders = createAsyncThunk(
     'orders/fetch',
     async (_, { rejectWithValue }) => {
@@ -14,14 +15,17 @@ export const fetchOrders = createAsyncThunk(
     }
 );
 
+// Place a new order
 export const placeOrder = createAsyncThunk(
     'orders/place',
-    async (_, { rejectWithValue }) => {
+    async (orderData, { rejectWithValue }) => { // Change _ to orderData
         try {
-            const { data } = await voltixApi.post('/orders/', {});
+            // Pass orderData into the POST request
+            const { data } = await voltixApi.post('/orders/', orderData);
             return data;
         } catch (err) {
-            return rejectWithValue(err.response?.data?.error || err.message);
+            // Return the full error object so we can see what's wrong
+            return rejectWithValue(err.response?.data || err.message);
         }
     }
 );
@@ -46,7 +50,6 @@ const orderSlice = createSlice({
         builder
             .addCase(fetchOrders.pending, (state) => {
                 state.status = 'loading';
-                state.error = null;
             })
             .addCase(fetchOrders.fulfilled, (state, action) => {
                 state.status = 'succeeded';
@@ -56,7 +59,6 @@ const orderSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload;
             })
-
             .addCase(placeOrder.pending, (state) => {
                 state.placeStatus = 'loading';
                 state.placeError = null;
@@ -70,7 +72,6 @@ const orderSlice = createSlice({
                 state.placeStatus = 'failed';
                 state.placeError = action.payload;
             })
-
             .addCase(logoutUser.fulfilled, (state) => {
                 state.items = [];
                 state.status = 'idle';
@@ -83,7 +84,6 @@ const orderSlice = createSlice({
 });
 
 export const { clearPlaceState } = orderSlice.actions;
-export default orderSlice.reducer;
 
 export const selectAllOrders   = (state) => state.orders.items;
 export const selectOrdersStatus = (state) => state.orders.status;
@@ -91,3 +91,5 @@ export const selectOrdersError  = (state) => state.orders.error;
 export const selectLastOrderId  = (state) => state.orders.lastOrderId;
 export const selectPlaceStatus  = (state) => state.orders.placeStatus;
 export const selectPlaceError   = (state) => state.orders.placeError;
+
+export default orderSlice.reducer;

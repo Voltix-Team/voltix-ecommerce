@@ -1,24 +1,38 @@
 import axios from 'axios';
+import voltixApi from './voltixApi';
 
-const api = axios.create({
-    baseURL: process.env.REACT_APP_API_BASE_URL,    
+// dummyjson fallback (only used if REACT_APP_USE_DJANGO_PRODUCTS=false)
+const dummyApi = axios.create({
+    baseURL: 'https://dummyjson.com',
     timeout: 10000,
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
 });
 
-// Fetch products — all electronics or by specific category
+const USE_DJANGO = process.env.REACT_APP_USE_DJANGO_PRODUCTS === 'true';
+
+// ── fetchProducts ─────────────────────────────────────────────────────────────
 export const fetchProducts = async (category = 'all') => {
+    if (USE_DJANGO) {
+        try {
+            // build query string — ?category=smartphones or nothing for all
+            const params = category !== 'all' ? `?category=${category}` : '';
+            const { data } = await voltixApi.get(`/products/${params}`);
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch products from Django:', error.message);
+            return [];
+        }
+    }
+
+    // dummyjson fallback
     try {
         if (category === 'all') {
-            // Fetch each electronics category separately with limit
-            const smartphones   = await api.get('/products/category/smartphones?limit=100');
-            const laptops       = await api.get('/products/category/laptops?limit=100');
-            const tablets       = await api.get('/products/category/tablets?limit=100');
-            const accessories   = await api.get('/products/category/mobile-accessories?limit=100');
-
-            // Combine all into one array
+            const [smartphones, laptops, tablets, accessories] = await Promise.all([
+                dummyApi.get('/products/category/smartphones?limit=100'),
+                dummyApi.get('/products/category/laptops?limit=100'),
+                dummyApi.get('/products/category/tablets?limit=100'),
+                dummyApi.get('/products/category/mobile-accessories?limit=100'),
+            ]);
             return [
                 ...smartphones.data.products,
                 ...laptops.data.products,
@@ -26,22 +40,33 @@ export const fetchProducts = async (category = 'all') => {
                 ...accessories.data.products,
             ];
         } else {
-            const { data } = await api.get(`/products/category/${category}?limit=100`);
+            const { data } = await dummyApi.get(`/products/category/${category}?limit=100`);
             return data.products || [];
         }
     } catch (error) {
-        console.error('Failed to fetch products:', error.message);
+        console.error('Failed to fetch products from dummyjson:', error.message);
         return [];
     }
 };
 
-// Fetch single product by ID (for Product Details page)
+// ── fetchProductById ──────────────────────────────────────────────────────────
 export const fetchProductById = async (id) => {
+    if (USE_DJANGO) {
+        try {
+            const { data } = await voltixApi.get(`/products/${id}/`);
+            return data;
+        } catch (error) {
+            console.error('Failed to fetch product from Django:', error.message);
+            return null;
+        }
+    }
+
+    // dummyjson fallback
     try {
-        const { data } = await api.get(`/products/${id}`);
+        const { data } = await dummyApi.get(`/products/${id}`);
         return data;
     } catch (error) {
-        console.error('Failed to fetch product by ID:', error.message);
+        console.error('Failed to fetch product from dummyjson:', error.message);
         return null;
     }
 };

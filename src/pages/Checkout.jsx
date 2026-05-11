@@ -113,25 +113,48 @@ const Checkout = () => {
         return e;
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const errs = validate();
-        if (Object.keys(errs).length) { setErrors(errs); return; }
-        setErrors({});
-        setApiError('');
-        setLoading(true);
+   const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    
+    setErrors({});
+    setApiError('');
+    setLoading(true);
 
-        try {
-            const order = await dispatch(placeOrder()).unwrap();
-            dispatch(clearCart());
-            navigate('/success', { state: { orderId: order.id } });
-        } catch (err) {
-            setApiError(typeof err === 'string' ? err : 'Could not place order. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+    // 1. Create the data object your Django backend expects
+    const orderPayload = {
+        full_name: form.fullName,      // Matches Django's likely 'full_name' field
+        email: form.email,
+        phone: form.phone,
+        address: form.street,          // Matches your model's address field
+        city: form.city,
+        postal_code: form.postalCode,  
+        payment_method: paymentMethod,
+        total_price: total,
+        // 2. Format items so Django can create OrderItems
+        items: cartItems.map(item => ({
+            product: item.id, 
+            quantity: item.quantity,
+            price: item.price
+        }))
     };
 
+    try {
+        // 3. Pass orderPayload inside the dispatch call
+        const order = await dispatch(placeOrder(orderPayload)).unwrap();
+        dispatch(clearCart());
+        navigate('/success', { state: { orderId: order.id } });
+    } catch (err) {
+        // 4. Extract specific Django error messages if they exist
+        const errorMsg = typeof err === 'object' 
+            ? Object.values(err).flat()[0] 
+            : err;
+        setApiError(errorMsg || 'Could not place order. Please try again.');
+    } finally {
+        setLoading(false);
+    }
+};
     const brand = detectBrand(card.number);
 
     return (

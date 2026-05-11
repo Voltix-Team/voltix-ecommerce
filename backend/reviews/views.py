@@ -39,7 +39,7 @@ class ReviewListCreateView(APIView) :
 class ReviewDetailView(APIView) :
     permission_classes = [IsAuthenticatedOrReadOnly]
     
-    def get(self, pk, user) :
+    def get_object(self, pk, user) :
         try :
             # only return the review if it belongs to this user
             return Review.objects.get(pk=pk, user=user)
