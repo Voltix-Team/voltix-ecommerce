@@ -1,21 +1,22 @@
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from .models import Product
 from .serializers import ProductSerializer
+from rest_framework.parsers import MultiPartParser, FormParser # Import these for images
 
-class ProductViewSet(viewsets.ReadOnlyModelViewSet):
-    # AllowAny — anyone can browse products without logging in
-    permission_classes = [AllowAny]
-    queryset = Product.objects.all()
+# Change ReadOnlyModelViewSet -> ModelViewSet
+class ProductViewSet(viewsets.ModelViewSet):
+    # This allows public viewing, but requires a login to Add/Edit/Delete
+    permission_classes = [IsAuthenticatedOrReadOnly] 
+    
     serializer_class = ProductSerializer
-    # This allows the view to accept image files from the device
-    # parser_classes = (MultiPartParser, FormParser)
+    
+    # You MUST uncomment these to handle image uploads from Postman
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_queryset(self):
         queryset = Product.objects.all()
-        # ?category=smartphones → filter by category
         category = self.request.query_params.get('category')
-        # ?search=iphone → filter by name
         search = self.request.query_params.get('search')
 
         if category and category != 'all':
