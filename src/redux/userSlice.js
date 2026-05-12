@@ -1,24 +1,18 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-// base URL for all API calls — reads from .env file
-// in your React .env file add: REACT_APP_API_URL=http://127.0.0.1:8000/api
 const BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api';
 
 // ── token helpers ─────────────────────────────────────────────────────────────
-
-export const saveTokens = (access, refresh) => {
-    localStorage.setItem('voltix_access', access);
+export const saveTokens   = (access, refresh) => {
+    localStorage.setItem('voltix_access',  access);
     localStorage.setItem('voltix_refresh', refresh);
 };
-
-export const clearTokens = () => {
+export const clearTokens  = () => {
     localStorage.removeItem('voltix_access');
     localStorage.removeItem('voltix_refresh');
 };
-
 export const getAccessToken  = () => localStorage.getItem('voltix_access');
 export const getRefreshToken = () => localStorage.getItem('voltix_refresh');
-
 
 // ── thunks ────────────────────────────────────────────────────────────────────
 
@@ -39,9 +33,9 @@ export const registerUser = createAsyncThunk(
     'user/register',
     async (formData, { rejectWithValue }) => {
         const res = await fetch(`${BASE_URL}/auth/register/`, {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
+            body:    JSON.stringify(formData),
         });
         const data = await res.json();
         if (!res.ok) return rejectWithValue(data);
@@ -53,9 +47,9 @@ export const verifyEmail = createAsyncThunk(
     'user/verifyEmail',
     async (formData, { rejectWithValue }) => {
         const res = await fetch(`${BASE_URL}/auth/verify-email/`, {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
+            body:    JSON.stringify(formData),
         });
         const data = await res.json();
         if (!res.ok) return rejectWithValue(data);
@@ -67,12 +61,24 @@ export const loginUser = createAsyncThunk(
     'user/login',
     async (formData, { rejectWithValue }) => {
         const res = await fetch(`${BASE_URL}/auth/login/`, {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
+            body:    JSON.stringify(formData),
         });
         const data = await res.json();
         if (!res.ok) return rejectWithValue(data);
+
+        // ── BUG FIX: block unverified users on the frontend too ──────────────
+        // Django's LoginSerializer does NOT check is_verified, so an unverified
+        // user gets valid tokens back. We catch it here and reject cleanly so
+        // Login.jsx can show the right error message instead of redirecting.
+        if (!data.user?.is_verified) {
+            return rejectWithValue({
+                detail: 'Please verify your email before logging in.'
+            });
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         saveTokens(data.access, data.refresh);
         return data;
     }
@@ -85,14 +91,14 @@ export const logoutUser = createAsyncThunk(
         const refresh = getRefreshToken();
         try {
             await fetch(`${BASE_URL}/auth/logout/`, {
-                method: 'POST',
+                method:  'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${access}`,
+                    Authorization:  `Bearer ${access}`,
                 },
                 body: JSON.stringify({ refresh }),
             });
-        } catch (e) {}
+        } catch {}
         clearTokens();
         return true;
     }
@@ -103,10 +109,10 @@ export const updateUserProfile = createAsyncThunk(
     async (fields, { rejectWithValue }) => {
         const token = getAccessToken();
         const res = await fetch(`${BASE_URL}/auth/me/`, {
-            method: 'PATCH',
+            method:  'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
+                Authorization:  `Bearer ${token}`,
             },
             body: JSON.stringify(fields),
         });
@@ -120,9 +126,9 @@ export const requestPasswordReset = createAsyncThunk(
     'user/requestReset',
     async (email, { rejectWithValue }) => {
         const res = await fetch(`${BASE_URL}/auth/password-reset/`, {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
+            body:    JSON.stringify({ email }),
         });
         const data = await res.json();
         if (!res.ok) return rejectWithValue(data);
@@ -134,9 +140,9 @@ export const confirmPasswordReset = createAsyncThunk(
     'user/confirmReset',
     async (formData, { rejectWithValue }) => {
         const res = await fetch(`${BASE_URL}/auth/password-reset/confirm/`, {
-            method: 'POST',
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
+            body:    JSON.stringify(formData),
         });
         const data = await res.json();
         if (!res.ok) return rejectWithValue(data);
@@ -144,14 +150,20 @@ export const confirmPasswordReset = createAsyncThunk(
     }
 );
 
-
 // ── slice ─────────────────────────────────────────────────────────────────────
 
 const userSlice = createSlice({
     name: 'user',
     initialState: {
         data:    null,
-        loading: true,
+        // ── BUG FIX ──────────────────────────────────────────────────────────
+        // Was `true`. That meant the app booted in a perpetual "loading" state
+        // until loadUserFromToken resolved. Any route guard that reads
+        // `loading === true && data === null` would redirect back to /login
+        // AFTER a successful login + navigate("/"), undoing the redirect.
+        // Start as `false`; loadUserFromToken sets it to true while it runs.
+        // ─────────────────────────────────────────────────────────────────────
+        loading: false,
         error:   null,
     },
     reducers: {
@@ -159,23 +171,49 @@ const userSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+        // loadUserFromToken — sets loading true ONLY while the token check runs
         .addCase(loadUserFromToken.pending,   (state) => { state.loading = true; })
-        .addCase(loadUserFromToken.fulfilled, (state, action) => { state.data = action.payload; state.loading = false; })
-        .addCase(loadUserFromToken.rejected,  (state) => { state.data = null; state.loading = false; })
+        .addCase(loadUserFromToken.fulfilled, (state, action) => {
+            state.data    = action.payload;
+            state.loading = false;
+        })
+        .addCase(loadUserFromToken.rejected,  (state) => {
+            state.data    = null;
+            state.loading = false;
+        })
 
-        .addCase(loginUser.pending,   (state) => { state.loading = true; state.error = null; })
-        .addCase(loginUser.fulfilled, (state, action) => { state.data = action.payload.user; state.loading = false; state.error = null; })
-        .addCase(loginUser.rejected,  (state, action) => { state.loading = false; state.error = action.payload; })
+        // loginUser
+        .addCase(loginUser.pending,   (state) => { state.loading = true;  state.error = null; })
+        .addCase(loginUser.fulfilled, (state, action) => {
+            state.data    = action.payload.user;
+            state.loading = false;
+            state.error   = null;
+        })
+        .addCase(loginUser.rejected,  (state, action) => {
+            state.loading = false;
+            state.error   = action.payload;
+        })
 
+        // logoutUser
         .addCase(logoutUser.fulfilled, (state) => { state.data = null; state.loading = false; })
         .addCase(logoutUser.rejected,  (state) => { state.data = null; state.loading = false; })
 
-        .addCase(updateUserProfile.fulfilled, (state, action) => { state.data = action.payload; state.error = null; })
-        .addCase(updateUserProfile.rejected,  (state, action) => { state.error = action.payload; })
+        // updateUserProfile
+        .addCase(updateUserProfile.fulfilled, (state, action) => {
+            state.data  = action.payload;
+            state.error = null;
+        })
+        .addCase(updateUserProfile.rejected, (state, action) => {
+            state.error = action.payload;
+        })
 
-        .addCase(registerUser.pending,   (state) => { state.loading = true; state.error = null; })
+        // registerUser
+        .addCase(registerUser.pending,   (state) => { state.loading = true;  state.error = null; })
         .addCase(registerUser.fulfilled, (state) => { state.loading = false; })
-        .addCase(registerUser.rejected,  (state, action) => { state.loading = false; state.error = action.payload; });
+        .addCase(registerUser.rejected,  (state, action) => {
+            state.loading = false;
+            state.error   = action.payload;
+        });
     },
 });
 
