@@ -1,0 +1,116 @@
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import ProductCard from '../components/UI/Card';
+import { fetchProducts } from '../services/api';
+import Button from '../components/UI/Button';
+
+const Home = ({ addToCart }) => {
+    const [products,         setProducts]         = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [loading,          setLoading]          = useState(true);
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const searchQuery    = searchParams.get('search')   || '';
+    const activeCategory = searchParams.get('category') || 'all';
+
+    const setActiveCategory = (cat) => {
+        setSearchParams(prev => {
+            const next = new URLSearchParams(prev);
+            if (cat === 'all') next.delete('category');
+            else next.set('category', cat);
+            return next;
+        });
+    };
+
+    useEffect(() => {
+        setLoading(true);
+        fetchProducts(activeCategory).then(data => {
+            setProducts(data);
+            setLoading(false);
+        });
+    }, [activeCategory]); // ← re-fetch when category changes
+
+    useEffect(() => {
+        let result = [...products];
+
+        if (searchQuery) {
+            result = result.filter(p => {
+                // Django uses 'name', dummyjson uses 'title' — handle both
+                const name  = (p.name  || p.title || '').toLowerCase();
+                const brand = (p.brand || '').toLowerCase();
+                const q     = searchQuery.toLowerCase();
+                return name.includes(q) || brand.includes(q);
+            });
+        }
+
+        setFilteredProducts(result);
+    }, [products, searchQuery]);
+
+    // categories that exist in the Django DB
+    const categories = ['all', 'smartphones', 'laptops', 'tablets', 'mobile-accessories'];
+
+    if (loading) {
+        return <div className="text-center py-20 text-xl">Loading Products...</div>;
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            {/* hero section */}
+            <div className="bg-slate-800 text-white py-24">
+                <div className="max-w-6xl mx-auto px-6 text-center">
+                    <h1 className="text-6xl font-bold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+                        Unleash Power
+                    </h1>
+                    <p className="text-xl max-w-2xl mx-auto text-slate-400 font-medium mb-3">
+                        Experience the next generation of premium electronics
+                    </p>
+                    <Button
+                        onClick={() => document.getElementById('products').scrollIntoView({ behavior: 'smooth' })}
+                        className="px-24 py-4"
+                    >
+                        Shop Now
+                    </Button>
+                </div>
+            </div>
+
+            <div id="products" className="max-w-6xl mx-auto px-6 py-12">
+                {/* category filters */}
+                <div className="flex flex-wrap gap-3 mb-10 justify-center">
+                    {categories.map(cat => (
+                        <Button
+                            key={cat}
+                            variant="category"
+                            onClick={() => setActiveCategory(cat)}
+                            className={`${
+                                activeCategory === cat
+                                    ? 'bg-blue-700 text-white shadow'
+                                    : 'bg-white border border-gray-200 hover:bg-gray-50'
+                            }`}
+                        >
+                            {cat === 'all' ? 'All Products' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </Button>
+                    ))}
+                </div>
+
+                {/* products grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {filteredProducts.map(product => (
+                        <ProductCard
+                            key={product.id}
+                            product={product}
+                            addToCart={addToCart}
+                        />
+                    ))}
+                </div>
+
+                {filteredProducts.length === 0 && (
+                    <p className="text-center py-20 text-gray-500 text-xl">
+                        No products found in this category.
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default Home;
