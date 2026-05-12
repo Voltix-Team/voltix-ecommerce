@@ -10,47 +10,37 @@ import { CheckCircle2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, selectCartCount } from './redux/cartSlice';
 import { fetchWishlist } from './redux/wishlistSlice';
-import { loadUserFromToken } from './redux/userSlice'; // ← replaces Firebase onAuthStateChanged
+import { loadUserFromToken } from './redux/userSlice';
 
-import Navbar        from './components/Layout/Navbar/Navbar';
-import Footer        from './components/Layout/Footer';
-import Login         from './pages/Login';
-import Home          from './pages/Home';
-import Signup        from './pages/Signup';
-import VerifyEmail   from './pages/VerifyEmail';   // ← new page for OTP verification
+import Navbar         from './components/Layout/Navbar/Navbar';
+import Footer         from './components/Layout/Footer';
+import Login          from './pages/Login';
+import Home           from './pages/Home';
+import Signup         from './pages/Signup';
+import VerifyEmail    from './pages/VerifyEmail';
 import ProductDetails from './pages/ProductDetails';
-import Cart          from './pages/Cart';
-import Success       from './pages/Success';
-import Checkout      from './pages/Checkout';
-import ProfilePage   from './pages/Profile';
-import Wishlist      from './pages/Wishlist';
-import Orders        from './pages/Orders';
-import { Toaster }   from 'react-hot-toast';
+import Cart           from './pages/Cart';
+import Success        from './pages/Success';
+import Checkout       from './pages/Checkout';
+import ProfilePage    from './pages/Profile';
+import Wishlist       from './pages/Wishlist';
+import Orders         from './pages/Orders';
+import { Toaster }    from 'react-hot-toast';
 
 function App() {
   const dispatch  = useDispatch();
   const cartCount = useSelector(selectCartCount);
   const [toast, setToast] = useState(null);
 
-  // read loading and user from Redux userSlice
   const { loading, data: user } = useSelector((state) => state.user);
 
   useEffect(() => {
-    // on every page load or refresh:
-    // 1. check if a JWT access token exists in localStorage
-    // 2. if yes → call GET /api/auth/me/ to get the user profile
-    // 3. if no or expired → stay logged out (loading becomes false, data stays null)
     dispatch(loadUserFromToken()).then((action) => {
       if (action.payload?.id) {
-        // token was valid → fetch the user's wishlist from the API
         dispatch(fetchWishlist());
       }
     });
   }, [dispatch]);
-
-  // block rendering until we know the auth state
-  // prevents showing wrong navbar or redirecting before check completes
-  if (loading) return <div>Loading...</div>;
 
   const showToast = (product) => {
     setToast(product);
@@ -63,25 +53,43 @@ function App() {
   };
 
   return (
+    // ── BUG FIX ────────────────────────────────────────────────────────────
+    // Previously: `if (loading) return <div>Loading...</div>` was ABOVE the
+    // Router. This meant the Router was unmounted while loadUserFromToken ran.
+    // So when Login.jsx called navigate("/") after a successful login,
+    // the Router wasn't in the tree yet and the navigation was silently lost.
+    // When loading finally resolved the Router mounted, but navigate had
+    // already fired into nothing — leaving the user stuck on /login.
+    //
+    // Fix: Router is now always mounted. The loading spinner renders INSIDE
+    // it, so navigate() always has a live Router to work with.
+    // ───────────────────────────────────────────────────────────────────────
     <Router>
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar cartCount={cartCount} />
 
         <main className="flex-1 flex flex-col">
-          <Routes>
-            <Route path="/"             element={<Home addToCart={handleAddToCart} />} />
-            <Route path="/product/:id"  element={<ProductDetails addToCart={handleAddToCart} />} />
-            <Route path="/cart"         element={<Cart />} />
-            <Route path="/checkout"     element={<Checkout />} />
-            <Route path="/login"        element={<Login />} />
-            <Route path="/signup"       element={<Signup />} />
-            {/* new route — user lands here after signup to enter OTP */}
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/success"      element={<Success />} />
-            <Route path="/profile"      element={<ProfilePage />} />
-            <Route path="/orders"       element={<Orders />} />
-            <Route path="/wishlist"     element={<Wishlist addToCart={handleAddToCart} />} />
-          </Routes>
+          {loading ? (
+            // Auth check in progress — show a simple spinner.
+            // Router is still mounted so any in-flight navigate() calls land.
+            <div className="flex-1 flex items-center justify-center py-32">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <Routes>
+              <Route path="/"             element={<Home addToCart={handleAddToCart} />} />
+              <Route path="/product/:id"  element={<ProductDetails addToCart={handleAddToCart} />} />
+              <Route path="/cart"         element={<Cart />} />
+              <Route path="/checkout"     element={<Checkout />} />
+              <Route path="/login"        element={<Login />} />
+              <Route path="/signup"       element={<Signup />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/success"      element={<Success />} />
+              <Route path="/profile"      element={<ProfilePage />} />
+              <Route path="/orders"       element={<Orders />} />
+              <Route path="/wishlist"     element={<Wishlist addToCart={handleAddToCart} />} />
+            </Routes>
+          )}
         </main>
 
         <Footer />
